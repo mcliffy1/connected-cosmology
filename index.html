@@ -192,7 +192,7 @@
 
 <div id="container">
     <div id="sidebar">
-        <h2>Soliton Universe v3.8</h2>
+        <h2>Soliton Universe v3.9</h2>
         
         <div class="control-group">
             <label>Scale Domain</label>
@@ -305,11 +305,12 @@
     };
 
     function resize() {
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
+        if (canvas && canvas.parentElement) {
+            canvas.width = canvas.parentElement.clientWidth || window.innerWidth - 350;
+            canvas.height = canvas.parentElement.clientHeight || window.innerHeight;
+        }
     }
     window.addEventListener('resize', resize);
-    resize();
 
     btnMacro.addEventListener('click', () => { setMode('macro', btnMacro, "Galactic Soliton Wave Packet", "Observing flat velocity curves generated entirely by the geometric eigenvalue of the nonlinear plenum fluid. Spatial stabilization balances cosmic dispersion."); });
     btnMicro.addEventListener('click', () => { setMode('micro', btnMicro, "Acoustic Bound State (White Atom)", "Hydrogen orbital rendering derived from emergent quantization in a dispersive medium. Matter manifests as a localized, spherical 3D cymatic standing wave."); });
@@ -318,27 +319,27 @@
 
     function setMode(m, activeBtn, title, text) {
         state.mode = m;
-        [btnMacro, btnMicro, btnBio, btnBlackHole].forEach(b => b.classList.remove('active'));
-        activeBtn.classList.add('active');
+        [btnMacro, btnMicro, btnBio, btnBlackHole].forEach(b => { if(b) b.classList.remove('active'); });
+        if (activeBtn) activeBtn.classList.add('active');
         
-        hudTitle.innerText = title;
-        hudText.innerText = text;
-        mobHudTitle.innerText = title;
-        mobHudText.innerText = text;
+        if (hudTitle) hudTitle.innerText = title;
+        if (hudText) hudText.innerText = text;
+        if (mobHudTitle) mobHudTitle.innerText = title;
+        if (mobHudText) mobHudText.innerText = text;
         
         updateStateValues();
     }
 
     function updateStateValues() {
-        state.teslaNode = parseFloat(sliderTesla.value) || 9.0;
-        state.nonlinearity = parseFloat(sliderNonlinear.value) || 3.0;
-        state.fluidDensity = parseFloat(sliderDensity.value) || 1.2;
-        state.freqIndex = parseInt(sliderFreq.value) || 1;
+        state.teslaNode = sliderTesla ? parseFloat(sliderTesla.value) : 9.0;
+        state.nonlinearity = sliderNonlinear ? parseFloat(sliderNonlinear.value) : 3.0;
+        state.fluidDensity = sliderDensity ? parseFloat(sliderDensity.value) : 1.2;
+        state.freqIndex = sliderFreq ? parseInt(sliderFreq.value) : 1;
 
-        valTesla.innerText = state.teslaNode.toFixed(1);
-        valNonlinear.innerText = state.nonlinearity.toFixed(1);
-        valDensity.innerText = state.fluidDensity.toFixed(2);
-        valFreq.innerText = state.freqIndex;
+        if (valTesla) valTesla.innerText = state.teslaNode.toFixed(1);
+        if (valNonlinear) valNonlinear.innerText = state.nonlinearity.toFixed(1);
+        if (valDensity) valDensity.innerText = state.fluidDensity.toFixed(2);
+        if (valFreq) valFreq.innerText = state.freqIndex;
 
         let distTo3 = Math.abs(state.teslaNode - 3.0);
         let distTo6 = Math.abs(state.teslaNode - 6.0);
@@ -369,13 +370,11 @@
         }
     }
 
-    // Safely assign initialization hooks to ensure dynamic state variables evaluate properly on open
     [sliderTesla, sliderNonlinear, sliderDensity, sliderFreq].forEach(slider => {
-        if(slider) slider.addEventListener('input', updateStateValues);
+        if (slider) slider.addEventListener('input', updateStateValues);
     });
-    updateStateValues();
 
-    if(btnPulse) {
+    if (btnPulse) {
         btnPulse.addEventListener('click', () => {
             state.pulseActive = 1.0;
         });
@@ -531,3 +530,28 @@
         }
 
         let coreGlow = ctx.createRadialGradient(rightCenterX, rightCenterY, 0, rightCenterX, rightCenterY, 22);
+        coreGlow.addColorStop(0, '#ffffff'); 
+        let rightAlpha = Math.max(0, Math.min(1, 0.8 * (state.nonlinearity / 3)));
+        coreGlow.addColorStop(0.3, `rgba(69, 243, 255, ${rightAlpha || 0.8})`); coreGlow.addColorStop(1, 'rgba(11, 12, 16, 0)');
+        ctx.fillStyle = coreGlow; ctx.beginPath(); ctx.arc(rightCenterX, rightCenterY, 22, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#66fcf1'; ctx.font = '9px Segoe UI'; ctx.fillText("STABLE BOUND STATE CORE", rightCenterX, rightCenterY + 4);
+        ctx.textAlign = 'left';
+    }
+
+    function drawSynchronicityPulse(cx, cy, maxR) {
+        let pulseRadius = maxR * (1 - state.pulseActive) * 1.5;
+        let pulseAlpha = Math.max(0, Math.min(1, state.pulseActive));
+        ctx.strokeStyle = `rgba(102, 252, 241, ${pulseAlpha})`; ctx.setLineDash([]); ctx.lineWidth = 3 * state.pulseActive;
+        ctx.beginPath(); ctx.arc(cx, cy, pulseRadius, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    // Force script compilation context loops exclusively after window elements establish structure
+    window.onload = function() {
+        resize();
+        updateStateValues();
+        animate();
+    };
+</script>
+
+</body>
+</html>
