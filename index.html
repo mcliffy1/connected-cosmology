@@ -166,7 +166,7 @@
             color: #c5c6c7;
         }
 
-        /* Responsive Mobile Layouts */
+        /* Responsive Mobile Architecture Layouts */
         @media (max-width: 768px) {
             #container {
                 flex-direction: column;
@@ -208,7 +208,7 @@
 
 <div id="container">
     <div id="sidebar">
-        <h2>Soliton Universe V3.0</h2>
+        <h2>Soliton Universe v3.1</h2>
         
         <div class="control-group">
             <label>Scale Domain</label>
@@ -404,13 +404,14 @@
             for (let r = maxR; r > 5; r -= 4) {
                 let theta = armAngle + (maxR - r) * (0.01 * nl * dens);
                 let x = cx + Math.cos(theta) * r; let y = cy + Math.sin(theta) * r;
-                let alpha = (1 - r / maxR) * 0.6; ctx.strokeStyle = `rgba(69, 243, 255, ${alpha})`;
+                let alpha = Math.max(0, Math.min(1, (1 - r / maxR) * 0.6)); ctx.strokeStyle = `rgba(69, 243, 255, ${alpha})`;
                 if (r === maxR) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.stroke();
         }
         let gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 0.4);
-        gradient.addColorStop(0, `rgba(69, 243, 255, ${0.8 * (nl/3)})`); gradient.addColorStop(0.3, `rgba(102, 252, 241, 0.4)`); gradient.addColorStop(1, 'rgba(11, 12, 16, 0)');
+        let gradAlpha = Math.max(0, Math.min(1, 0.8 * (nl/3)));
+        gradient.addColorStop(0, `rgba(69, 243, 255, ${gradAlpha})`); gradient.addColorStop(0.3, `rgba(102, 252, 241, 0.4)`); gradient.addColorStop(1, 'rgba(11, 12, 16, 0)');
         ctx.fillStyle = gradient; ctx.beginPath(); ctx.arc(cx, cy, maxR * 0.4, 0, Math.PI * 2); ctx.fill();
         let axisY = cy + maxR * 0.72; ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx - maxR, axisY); ctx.lineTo(cx + maxR, axisY); ctx.stroke();
         ctx.strokeStyle = '#66fcf1'; ctx.lineWidth = 2; ctx.beginPath();
@@ -427,11 +428,13 @@
         for (let i = 0; i < totalRays; i++) {
             let angle = (i * Math.PI * 2) / totalRays; let radialPressure = Math.sin(n * state.time * 1.5) * Math.cos(n * angle * 2); let nodeRadius = maxR * 0.5 + radialPressure * (25 * dens);
             let startX = cx + Math.cos(angle) * (nodeRadius * 0.1); let startY = cy + Math.sin(angle) * (nodeRadius * 0.1); let endX = cx + Math.cos(angle) * nodeRadius; let endY = cy + Math.sin(angle) * nodeRadius;
-            let hue = 180 + (n * 30); let intensity = Math.abs(radialPressure); ctx.strokeStyle = `hsla(${hue}, 100%, 70%, ${intensity * 0.35})`;
+            let hue = 180 + (n * 30); let intensity = Math.max(0, Math.min(1, Math.abs(radialPressure) * 0.35)); ctx.strokeStyle = `hsla(${hue}, 100%, 70%, ${intensity})`;
             ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
         }
         for (let level = 1; level <= n; level++) {
-            let shellR = maxR * (level / (n + 0.5)); ctx.strokeStyle = `rgba(69, 243, 255, ${0.15 / level})`; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.arc(cx, cy, shellR, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+            let shellR = maxR * (level / (n + 0.5)); 
+            let shellAlpha = Math.max(0, Math.min(1, 0.15 / level));
+            ctx.strokeStyle = `rgba(69, 243, 255, ${shellAlpha})`; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.arc(cx, cy, shellR, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
         }
         ctx.fillStyle = '#ffffff'; ctx.shadowBlur = 15; ctx.shadowColor = '#45f3ff'; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
     }
@@ -445,12 +448,12 @@
             for (let t = -Math.PI; t <= Math.PI; t += 0.1) {
                 let r = (maxR * 0.4) * (1 + 0.3 * Math.sin(freq * t + state.time)); let noise = Math.sin(t * 12 + i) * noiseFactor;
                 let x = cx + Math.cos(angle) * (r + noise) * Math.cos(t); let y = cy + Math.sin(angle) * (r + noise) * Math.cos(t) + Math.sin(t) * (maxR * 0.2);
-                let alpha = (Math.cos(t) + 1) * 0.2 + 0.1; ctx.strokeStyle = `rgba(102, 252, 241, ${alpha})`;
+                let alpha = Math.max(0, Math.min(1, (Math.cos(t) + 1) * 0.2 + 0.1)); ctx.strokeStyle = `rgba(102, 252, 241, ${alpha})`;
                 if (t === -Math.PI) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.stroke();
         }
-        let pulseGlow = 10 + state.pulseActive * 25; ctx.fillStyle = '#ffffff'; ctx.shadowBlur = pulseGlow; ctx.shadowColor = '#66fcf1'; ctx.beginPath(); ctx.arc(cx, cy, 6 + state.pulseActive * 4, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+        let pulseGlow = Math.max(0, Math.min(50, 10 + state.pulseActive * 25)); ctx.fillStyle = '#ffffff'; ctx.shadowBlur = pulseGlow; ctx.shadowColor = '#66fcf1'; ctx.beginPath(); ctx.arc(cx, cy, 6 + state.pulseActive * 4, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
     }
 
     function drawBlackHoleLab(maxR) {
@@ -500,4 +503,50 @@
             }
             ctx.stroke();
         }
-        ctx.
+        ctx.fillStyle = '#000000'; ctx.strokeStyle = 'rgba(255, 0, 100, 0.5)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(leftCenterX, leftCenterY, 22, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        
+        ctx.fillStyle = '#ff0055'; ctx.beginPath(); ctx.arc(leftCenterX, leftCenterY, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.font = '9px Segoe UI'; ctx.fillText("INFINITY BREAK", leftCenterX, leftCenterY + 4);
+
+        // --- RIGHT SIDE: SUPERFLUID VORTEX SOLITON ---
+        ctx.strokeStyle = 'rgba(102, 252, 241, 0.15)'; ctx.lineWidth = 1.5;
+        let arms = 6;
+        for (let i = 0; i < arms; i++) {
+            let baseAngle = (i * Math.PI * 2) / arms + state.time * 0.4; ctx.beginPath();
+            for (let r = viewRadius; r > 20; r -= 3) {
+                let theta = baseAngle + (viewRadius - r) * (0.02 * state.fluidDensity);
+                let x = rightCenterX + Math.cos(theta) * r; let y = rightCenterY + Math.sin(theta) * r;
+                if (r === viewRadius) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+
+        let leakAlpha = Math.max(0, Math.min(1, 0.2 * Math.sin(state.time * 2)));
+        ctx.strokeStyle = `rgba(69, 243, 255, ${leakAlpha})`; ctx.lineWidth = 1;
+        for (let r = 25; r < viewRadius; r += 20) {
+            ctx.beginPath(); ctx.arc(rightCenterX, rightCenterY, r + (state.time * 12) % 20, 0, Math.PI * 2); ctx.stroke();
+        }
+
+        let coreGlow = ctx.createRadialGradient(rightCenterX, rightCenterY, 0, rightCenterX, rightCenterY, 22);
+        coreGlow.addColorStop(0, '#ffffff'); 
+        let rightAlpha = Math.max(0, Math.min(1, 0.8 * (state.nonlinearity / 3)));
+        coreGlow.addColorStop(0.3, `rgba(69, 243, 255, ${rightAlpha})`); coreGlow.addColorStop(1, 'rgba(11, 12, 16, 0)');
+        ctx.fillStyle = coreGlow; ctx.beginPath(); ctx.arc(rightCenterX, rightCenterY, 22, 0, Math.PI * 2); ctx.fill();
+        
+        ctx.fillStyle = '#66fcf1'; ctx.font = '9px Segoe UI'; ctx.fillText("STABLE BOUND STATE CORE", rightCenterX, rightCenterY + 4);
+        ctx.textAlign = 'left';
+    }
+
+    function drawSynchronicityPulse(cx, cy, maxR) {
+        let pulseRadius = maxR * (1 - state.pulseActive) * 1.5;
+        let pulseAlpha = Math.max(0, Math.min(1, state.pulseActive));
+        ctx.strokeStyle = `rgba(102, 252, 241, ${pulseAlpha})`; ctx.lineWidth = 3 * state.pulseActive;
+        ctx.beginPath(); ctx.arc(cx, cy, pulseRadius, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    animate();
+</script>
+
+</body>
+</html>
