@@ -192,7 +192,7 @@
 
 <div id="container">
     <div id="sidebar">
-        <h2>Soliton Universe v3.6</h2>
+        <h2>Soliton Universe v3.7</h2>
         
         <div class="control-group">
             <label>Scale Domain</label>
@@ -202,11 +202,6 @@
                 <button id="btn-bio" class="btn">Bio-Observer</button>
                 <button id="btn-blackhole" class="btn">Black Hole Lab</button>
             </div>
-        </div>
-
-        <div class="control-group">
-            <label>Tesla Harmonic Node <span id="val-tesla" class="value-display">9</span></label>
-            <input type="range" id="slider-tesla" min="0" max="12" step="0.1" value="9">
         </div>
 
         <div class="control-group" id="param-nonlinearity">
@@ -222,6 +217,11 @@
         <div class="control-group" id="param-frequency">
             <label>Resonant Frequency (&omega;) <span id="val-freq" class="value-display">1</span></label>
             <input type="range" id="slider-freq" min="1" max="4" step="1" value="1">
+        </div>
+
+        <div class="control-group">
+            <label>Tesla Harmonic Node <span id="val-tesla" class="value-display">9</span></label>
+            <input type="range" id="slider-tesla" min="0" max="12" step="0.1" value="9">
         </div>
 
         <div class="control-group">
@@ -241,9 +241,6 @@
         <div id="framework-desc">
             <h3>Framework Mapping</h3>
             <div class="desc-block">
-                <span class="desc-title">Tesla Harmonic Node:</span> Sweeps across the cosmic matrix layout. Snapping onto 3, 6, or 9 triggers an inductive impedance match, phase-locking field coherence.
-            </div>
-            <div class="desc-block">
                 <span class="desc-title">Field Nonlinearity:</span> Dictates spatial self-stabilization. On the bio-scale, this models the transition from unaligned cognitive noise to coherent intent.
             </div>
             <div class="desc-block">
@@ -254,6 +251,9 @@
             </div>
             <div class="desc-block">
                 <span class="desc-title">Synchronicity Pulse:</span> Models the instantaneous localized phase-locking event that drops medium viscosity, collapsing distance/time to a single point.
+            </div>
+            <div class="desc-block">
+                <span class="desc-title">Tesla Harmonic Node:</span> Sweeps across the cosmic matrix layout. Snapping onto 3, 6, or 9 triggers an inductive impedance match, phase-locking field coherence.
             </div>
         </div>
     </div>
@@ -428,4 +428,48 @@
         }
         let gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 0.4);
         let gradAlpha = Math.max(0, Math.min(1, 0.8 * (nl/3)));
-        gradient.addColorStop(0, `rgba(69, 243, 255, ${gradAlpha})`); gradient.addColorStop(0.3, `rgba
+        gradient.addColorStop(0, `rgba(69, 243, 255, ${gradAlpha})`); gradient.addColorStop(0.3, `rgba(102, 252, 241, 0.4)`); gradient.addColorStop(1, 'rgba(11, 12, 16, 0)');
+        ctx.fillStyle = gradient; ctx.beginPath(); ctx.arc(cx, cy, maxR * 0.4, 0, Math.PI * 2); ctx.fill();
+        let axisY = cy + maxR * 0.72; ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx - maxR, axisY); ctx.lineTo(cx + maxR, axisY); ctx.stroke();
+        ctx.strokeStyle = '#66fcf1'; ctx.lineWidth = 2; ctx.beginPath();
+        for (let px = -maxR; px <= maxR; px += 5) {
+            let r = Math.abs(px); if (r < 10) continue;
+            let v = (1 - Math.exp(-r * 0.04)) * (maxR * 0.2) * (nl / 3); let py = axisY - v;
+            if (px === -maxR) ctx.moveTo(cx + px, py); else ctx.lineTo(cx + px, py);
+        }
+        ctx.stroke(); ctx.fillStyle = 'rgba(102, 252, 241, 0.7)'; ctx.font = '10px Segoe UI'; ctx.fillText("FLAT ROTATION VELOCITY CURVE (PHASE ENVELOPE)", cx - maxR, axisY + 14);
+    }
+
+    function drawMicroAtom(cx, cy, maxR, n, dens) {
+        let totalRays = 180; ctx.lineWidth = 2;
+        for (let i = 0; i < totalRays; i++) {
+            let angle = (i * Math.PI * 2) / totalRays; let radialPressure = Math.sin(n * state.time * 1.5) * Math.cos(n * angle * 2); let nodeRadius = maxR * 0.5 + radialPressure * (25 * dens);
+            let startX = cx + Math.cos(angle) * (nodeRadius * 0.1); let startY = cy + Math.sin(angle) * (nodeRadius * 0.1); let endX = cx + Math.cos(angle) * nodeRadius; let endY = cy + Math.sin(angle) * nodeRadius;
+            let hue = 180 + (n * 30); let intensity = Math.max(0, Math.min(1, Math.abs(radialPressure) * 0.35)); ctx.strokeStyle = `hsla(${hue}, 100%, 70%, ${intensity})`;
+            ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
+        }
+        for (let level = 1; level <= n; level++) {
+            let shellR = maxR * (level / (n + 0.5)); 
+            let shellAlpha = Math.max(0, Math.min(1, 0.15 / level));
+            ctx.strokeStyle = `rgba(69, 243, 255, ${shellAlpha})`; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.arc(cx, cy, shellR, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+        }
+        ctx.fillStyle = '#ffffff'; ctx.shadowBlur = 15; ctx.shadowColor = '#45f3ff'; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    }
+
+    function drawBioObserver(cx, cy, maxR, nl, dens, freq) {
+        ctx.strokeStyle = 'rgba(69, 243, 255, 0.03)'; ctx.lineWidth = 1; let driftX = Math.sin(state.time * 0.5) * 20 * (1 - state.pulseActive);
+        for (let i = -maxR; i < maxR * 1.5; i += 30) { ctx.beginPath(); ctx.moveTo(cx - maxR + driftX, cy + i); ctx.lineTo(cx + maxR + driftX, cy - i); ctx.stroke(); }
+        
+        let totalLoops = 24 + (freq * 6); ctx.lineWidth = 1.5; let noiseFactor = (5 - nl) * 8 * (1 - state.pulseActive) + (state.jitter * 2);
+        for (let i = 0; i < totalLoops; i++) {
+            let angle = (i * Math.PI * 2) / totalLoops + state.time * 0.2; ctx.beginPath();
+            for (let t = -Math.PI; t <= Math.PI; t += 0.1) {
+                let r = (maxR * 0.4) * (1 + 0.3 * Math.sin(freq * t + state.time)); let noise = Math.sin(t * 12 + i) * noiseFactor;
+                let x = cx + Math.cos(angle) * (r + noise) * Math.cos(t); let y = cy + Math.sin(angle) * (r + noise) * Math.cos(t) + Math.sin(t) * (maxR * 0.2);
+                let alpha = Math.max(0, Math.min(1, (Math.cos(t) + 1) * 0.2 + 0.1)); 
+                ctx.strokeStyle = `rgba(255, 215, 0, ${alpha})`;
+                if (t === -Math.PI) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+        let pulseGlow = Math.max(0, Math.min(50, 10 + state.pulseActive *
