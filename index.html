@@ -168,8 +168,6 @@
         }
 
         /* --- RESPONSIVE MEDIA BREAKPOINTS --- */
-        
-        /* 1. Portrait Mobile Viewports (Narrow Screens) */
         @media (max-width: 768px) {
             #container {
                 flex-direction: column;
@@ -202,10 +200,9 @@
             }
         }
 
-        /* 2. Landscape Mobile Viewports (Wide but Short Screens) */
         @media (max-height: 500px) {
             #sidebar {
-                width: 260px; /* Slims down the sidebar width to rescue horizontal space */
+                width: 260px;
                 padding: 10px;
                 gap: 8px;
             }
@@ -218,16 +215,15 @@
                 font-size: 0.7em;
             }
             #hud {
-                display: none !important; /* Forcefully obliterates floating box when screen height is small */
+                display: none !important;
                 opacity: 0 !important;
                 visibility: hidden !important;
             }
             #framework-desc {
-                display: none; /* Clear dense background paragraphs during landscape shifts */
+                display: none;
             }
         }
         
-        /* Layout Helper Rule for Dual HUD Display Blocks */
         @media (min-width: 769px) and (min-height: 501px) {
             #sidebar-hud {
                 display: none;
@@ -239,7 +235,7 @@
 
 <div id="container">
     <div id="sidebar">
-        <h2>Soliton Universe </h2>
+        <h2>Soliton Universe v3.4</h2>
         
         <div class="control-group">
             <label>Scale Domain</label>
@@ -427,8 +423,10 @@
     }
 
     function drawMacroSoliton(cx, cy, maxR, nl, dens) {
-        ctx.strokeStyle = 'rgba(102, 252, 241, 0.04)'; ctx.lineWidth = 1;
+        // RADIAL BACKDROP LINES: Shifted to a high-contrast glowing orange
+        ctx.strokeStyle = 'rgba(255, 140, 0, 0.06)'; ctx.lineWidth = 1;
         for (let r = 50; r < maxR * 1.5; r += 40) { ctx.beginPath(); ctx.arc(cx, cy, r + Math.sin(state.time + r*0.02)*5, 0, Math.PI * 2); ctx.stroke(); }
+        
         let numArms = 3; ctx.lineWidth = 1.5;
         for (let a = 0; a < numArms; a++) {
             let armAngle = (a * Math.PI * 2) / numArms + state.time * 0.1; ctx.beginPath();
@@ -455,6 +453,7 @@
     }
 
     function drawMicroAtom(cx, cy, maxR, n, dens) {
+        // PRESERVED UNTOUCHED: Native crisp cyan/teal laser nodes
         let totalRays = 180; ctx.lineWidth = 2;
         for (let i = 0; i < totalRays; i++) {
             let angle = (i * Math.PI * 2) / totalRays; let radialPressure = Math.sin(n * state.time * 1.5) * Math.cos(n * angle * 2); let nodeRadius = maxR * 0.5 + radialPressure * (25 * dens);
@@ -473,13 +472,18 @@
     function drawBioObserver(cx, cy, maxR, nl, dens, freq) {
         ctx.strokeStyle = 'rgba(69, 243, 255, 0.03)'; ctx.lineWidth = 1; let driftX = Math.sin(state.time * 0.5) * 20 * (1 - state.pulseActive);
         for (let i = -maxR; i < maxR * 1.5; i += 30) { ctx.beginPath(); ctx.moveTo(cx - maxR + driftX, cy + i); ctx.lineTo(cx + maxR + driftX, cy - i); ctx.stroke(); }
+        
         let totalLoops = 24 + (freq * 6); ctx.lineWidth = 1.5; let noiseFactor = (5 - nl) * 8 * (1 - state.pulseActive);
         for (let i = 0; i < totalLoops; i++) {
             let angle = (i * Math.PI * 2) / totalLoops + state.time * 0.2; ctx.beginPath();
             for (let t = -Math.PI; t <= Math.PI; t += 0.1) {
                 let r = (maxR * 0.4) * (1 + 0.3 * Math.sin(freq * t + state.time)); let noise = Math.sin(t * 12 + i) * noiseFactor;
                 let x = cx + Math.cos(angle) * (r + noise) * Math.cos(t); let y = cy + Math.sin(angle) * (r + noise) * Math.cos(t) + Math.sin(t) * (maxR * 0.2);
-                let alpha = Math.max(0, Math.min(1, (Math.cos(t) + 1) * 0.2 + 0.1)); ctx.strokeStyle = `rgba(102, 252, 241, ${alpha})`;
+                let alpha = Math.max(0, Math.min(1, (Math.cos(t) + 1) * 0.2 + 0.1)); 
+                
+                // BIOLOGICAL FIELD STRANDS: Shifted to a vibrant warm gold/yellow profile
+                ctx.strokeStyle = `rgba(255, 215, 0, ${alpha})`;
+                
                 if (t === -Math.PI) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.stroke();
@@ -490,8 +494,6 @@
     function drawBlackHoleLab(maxR) {
         const w = canvas.width;
         const h = canvas.height;
-        
-        // Portrait rule stacks fields vertically; Landscape or broad screen splits them left-to-right
         const isPortrait = h > w;
         
         const leftCenterX = isPortrait ? w / 2 : w * 0.35;
@@ -554,8 +556,9 @@
             ctx.stroke();
         }
 
-        let leakAlpha = Math.max(0, Math.min(1, 0.2 * Math.sin(state.time * 2)));
-        ctx.strokeStyle = `rgba(69, 243, 255, ${leakAlpha})`; ctx.lineWidth = 1;
+        // HAWKING LEAKAGE WAVES: Shifted to a high-visibility glowing orange ripple
+        let leakAlpha = Math.max(0, Math.min(1, 0.25 * Math.sin(state.time * 2)));
+        ctx.strokeStyle = `rgba(255, 140, 0, ${leakAlpha})`; ctx.lineWidth = 1.2;
         for (let r = 25; r < viewRadius; r += 20) {
             ctx.beginPath(); ctx.arc(rightCenterX, rightCenterY, r + (state.time * 12) % 20, 0, Math.PI * 2); ctx.stroke();
         }
