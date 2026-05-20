@@ -152,6 +152,7 @@
             border-radius: 6px;
             pointer-events: none;
             max-width: 400px;
+            display: block;
         }
         .hud-title {
             color: #66fcf1;
@@ -166,7 +167,7 @@
             color: #c5c6c7;
         }
 
-        /* Responsive Mobile Architecture Layouts */
+        /* --- HARD MOBILE ENFORCEMENT INTERFACE --- */
         @media (max-width: 768px) {
             #container {
                 flex-direction: column;
@@ -189,7 +190,9 @@
                 font-size: 0.75em;
             }
             #hud {
-                display: none;
+                display: none !important; /* Forcefully obliterates floating display window on screens under 768px */
+                opacity: 0 !important;
+                visibility: hidden !important;
             }
             #canvas-container {
                 height: 58%;
@@ -208,7 +211,7 @@
 
 <div id="container">
     <div id="sidebar">
-        <h2>Soliton Universe v3.1</h2>
+        <h2>Soliton Universe v3.2</h2>
         
         <div class="control-group">
             <label>Scale Domain</label>
