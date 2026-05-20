@@ -167,7 +167,7 @@
             color: #c5c6c7;
         }
 
-        /* --- RESPONSIVE BREAKPOINTS --- */
+        /* --- RESPONSIVE MEDIA BREAKPOINTS --- */
         @media (max-width: 768px) {
             #container { flex-direction: column; }
             #sidebar { width: 100vw; height: 45%; border-right: none; border-bottom: 2px solid #45f3ff; padding: 12px; gap: 10px; }
@@ -192,7 +192,7 @@
 
 <div id="container">
     <div id="sidebar">
-        <h2>Soliton Universe v3.5</h2>
+        <h2>Soliton Universe v3.6</h2>
         
         <div class="control-group">
             <label>Scale Domain</label>
@@ -241,10 +241,19 @@
         <div id="framework-desc">
             <h3>Framework Mapping</h3>
             <div class="desc-block">
-                <span class="desc-title">Tesla Harmonic Node:</span> Sweeps across the cosmic matrix layout. Snapping the selector precisely onto 3, 6, or 9 triggers an inductive impedance match, phase-locking field coherence.
+                <span class="desc-title">Tesla Harmonic Node:</span> Sweeps across the cosmic matrix layout. Snapping onto 3, 6, or 9 triggers an inductive impedance match, phase-locking field coherence.
             </div>
             <div class="desc-block">
-                <span class="desc-title">Field Nonlinearity:</span> Dictates spatial self-stabilization across fluid mediums.
+                <span class="desc-title">Field Nonlinearity:</span> Dictates spatial self-stabilization. On the bio-scale, this models the transition from unaligned cognitive noise to coherent intent.
+            </div>
+            <div class="desc-block">
+                <span class="desc-title">Plenum Fluid Density:</span> Governs the medium's density profile (vSODS vector), directly triggering quantum time-dilation variations.
+            </div>
+            <div class="desc-block">
+                <span class="desc-title">Resonant Frequency (&omega;):</span> Drives the cymatic standing wave shells of matter or the toroidal electro-magnetic fields of the observer.
+            </div>
+            <div class="desc-block">
+                <span class="desc-title">Synchronicity Pulse:</span> Models the instantaneous localized phase-locking event that drops medium viscosity, collapsing distance/time to a single point.
             </div>
         </div>
     </div>
@@ -331,13 +340,11 @@
         valDensity.innerText = state.fluidDensity.toFixed(2);
         valFreq.innerText = state.freqIndex;
 
-        // Calculate proximity to Tesla's lock-in channels (3, 6, 9)
         let distTo3 = Math.abs(state.teslaNode - 3.0);
         let distTo6 = Math.abs(state.teslaNode - 6.0);
         let distTo9 = Math.abs(state.teslaNode - 9.0);
         let minTeslaDist = Math.min(distTo3, distTo6, distTo9);
 
-        // Map jitter based on tuning dissonance
         state.jitter = minTeslaDist > 0.4 ? (minTeslaDist * 4) : 0;
 
         let baseStability = 0;
@@ -351,7 +358,6 @@
             baseStability = state.nonlinearity * 15 + state.fluidDensity * 10;
         }
 
-        // Interlock stability to Tesla tuning accuracy matrix
         let coherence = baseStability * (1 - (minTeslaDist / 6.0));
         coherence = Math.max(5, Math.min(100, coherence));
 
@@ -382,11 +388,8 @@
             updateStateValues();
         }
 
-        // Apply a visual phase distortion if system jitter is loose
-        let localTimeDelta = 0.025 * (1 - state.pulseActive * 0.5);
-        state.time += localTimeDelta; 
+        state.time += 0.025 * (1 - state.pulseActive * 0.5); 
 
-        // Apply visual noise effect derived from state jitter constraints
         let currentCenterX = centerX + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
         let currentCenterY = centerY + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
 
@@ -425,122 +428,4 @@
         }
         let gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 0.4);
         let gradAlpha = Math.max(0, Math.min(1, 0.8 * (nl/3)));
-        gradient.addColorStop(0, `rgba(69, 243, 255, ${gradAlpha})`); gradient.addColorStop(0.3, `rgba(102, 252, 241, 0.4)`); gradient.addColorStop(1, 'rgba(11, 12, 16, 0)');
-        ctx.fillStyle = gradient; ctx.beginPath(); ctx.arc(cx, cy, maxR * 0.4, 0, Math.PI * 2); ctx.fill();
-        let axisY = cy + maxR * 0.72; ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx - maxR, axisY); ctx.lineTo(cx + maxR, axisY); ctx.stroke();
-        ctx.strokeStyle = '#66fcf1'; ctx.lineWidth = 2; ctx.beginPath();
-        for (let px = -maxR; px <= maxR; px += 5) {
-            let r = Math.abs(px); if (r < 10) continue;
-            let v = (1 - Math.exp(-r * 0.04)) * (maxR * 0.2) * (nl / 3); let py = axisY - v;
-            if (px === -maxR) ctx.moveTo(cx + px, py); else ctx.lineTo(cx + px, py);
-        }
-        ctx.stroke(); ctx.fillStyle = 'rgba(102, 252, 241, 0.7)'; ctx.font = '10px Segoe UI'; ctx.fillText("FLAT ROTATION VELOCITY CURVE (PHASE ENVELOPE)", cx - maxR, axisY + 14);
-    }
-
-    function drawMicroAtom(cx, cy, maxR, n, dens) {
-        let totalRays = 180; ctx.lineWidth = 2;
-        for (let i = 0; i < totalRays; i++) {
-            let angle = (i * Math.PI * 2) / totalRays; let radialPressure = Math.sin(n * state.time * 1.5) * Math.cos(n * angle * 2); let nodeRadius = maxR * 0.5 + radialPressure * (25 * dens);
-            let startX = cx + Math.cos(angle) * (nodeRadius * 0.1); let startY = cy + Math.sin(angle) * (nodeRadius * 0.1); let endX = cx + Math.cos(angle) * nodeRadius; let endY = cy + Math.sin(angle) * nodeRadius;
-            let hue = 180 + (n * 30); let intensity = Math.max(0, Math.min(1, Math.abs(radialPressure) * 0.35)); ctx.strokeStyle = `hsla(${hue}, 100%, 70%, ${intensity})`;
-            ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
-        }
-        for (let level = 1; level <= n; level++) {
-            let shellR = maxR * (level / (n + 0.5)); 
-            let shellAlpha = Math.max(0, Math.min(1, 0.15 / level));
-            ctx.strokeStyle = `rgba(69, 243, 255, ${shellAlpha})`; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.arc(cx, cy, shellR, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-        }
-        ctx.fillStyle = '#ffffff'; ctx.shadowBlur = 15; ctx.shadowColor = '#45f3ff'; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
-    }
-
-    function drawBioObserver(cx, cy, maxR, nl, dens, freq) {
-        ctx.strokeStyle = 'rgba(69, 243, 255, 0.03)'; ctx.lineWidth = 1; let driftX = Math.sin(state.time * 0.5) * 20 * (1 - state.pulseActive);
-        for (let i = -maxR; i < maxR * 1.5; i += 30) { ctx.beginPath(); ctx.moveTo(cx - maxR + driftX, cy + i); ctx.lineTo(cx + maxR + driftX, cy - i); ctx.stroke(); }
-        
-        let totalLoops = 24 + (freq * 6); ctx.lineWidth = 1.5; let noiseFactor = (5 - nl) * 8 * (1 - state.pulseActive) + (state.jitter * 2);
-        for (let i = 0; i < totalLoops; i++) {
-            let angle = (i * Math.PI * 2) / totalLoops + state.time * 0.2; ctx.beginPath();
-            for (let t = -Math.PI; t <= Math.PI; t += 0.1) {
-                let r = (maxR * 0.4) * (1 + 0.3 * Math.sin(freq * t + state.time)); let noise = Math.sin(t * 12 + i) * noiseFactor;
-                let x = cx + Math.cos(angle) * (r + noise) * Math.cos(t); let y = cy + Math.sin(angle) * (r + noise) * Math.cos(t) + Math.sin(t) * (maxR * 0.2);
-                let alpha = Math.max(0, Math.min(1, (Math.cos(t) + 1) * 0.2 + 0.1)); 
-                ctx.strokeStyle = `rgba(255, 215, 0, ${alpha})`;
-                if (t === -Math.PI) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-        }
-        let pulseGlow = Math.max(0, Math.min(50, 10 + state.pulseActive * 25)); ctx.fillStyle = '#ffffff'; ctx.shadowBlur = pulseGlow; ctx.shadowColor = '#66fcf1'; ctx.beginPath(); ctx.arc(cx, cy, 6 + state.pulseActive * 4, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
-    }
-
-    function drawBlackHoleLab(maxR) {
-        const w = canvas.width; const h = canvas.height; const isPortrait = h > w;
-        const leftCenterX = isPortrait ? w / 2 : w * 0.35; const leftCenterY = isPortrait ? h * 0.26 : h / 2;
-        const rightCenterX = isPortrait ? w / 2 : w * 0.65; const rightCenterY = isPortrait ? h * 0.74 : h / 2;
-        const viewRadius = isPortrait ? maxR * 0.45 : maxR * 0.65;
-
-        ctx.strokeStyle = 'rgba(69, 243, 255, 0.2)'; ctx.lineWidth = 1; ctx.setLineDash([5, 5]); ctx.beginPath(); 
-        if (isPortrait) { ctx.moveTo(0, h * 0.5); ctx.lineTo(w, h * 0.5); } else { ctx.moveTo(w * 0.5, 0); ctx.lineTo(w * 0.5, h); }
-        ctx.stroke(); ctx.setLineDash([]);
-
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.font = 'bold 11px Segoe UI'; ctx.textAlign = 'center';
-        let textOffset = isPortrait ? viewRadius + 14 : viewRadius + 16;
-        ctx.fillText("STANDARD GENERAL RELATIVITY", leftCenterX, leftCenterY - textOffset);
-        ctx.fillText("SOLITON RESONANCE FRAMEWORK", rightCenterX, rightCenterY - textOffset);
-
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'; ctx.lineWidth = 1;
-        let classicalPulse = Math.sin(state.time * 0.5) * 2; 
-        for (let i = -8; i <= 8; i++) {
-            ctx.beginPath();
-            for (let r = viewRadius; r > 15; r -= 5) {
-                let warp = Math.pow(30 / r, 2) * (20 + classicalPulse); let angle = (i * Math.PI) / 8;
-                let x = leftCenterX + Math.cos(angle) * r; let y = leftCenterY + Math.sin(angle) * r + warp;
-                if (r === viewRadius) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-        }
-        ctx.fillStyle = '#000000'; ctx.strokeStyle = 'rgba(255, 0, 100, 0.5)'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(leftCenterX, leftCenterY, 22, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#ff0055'; ctx.beginPath(); ctx.arc(leftCenterX, leftCenterY, 2, 0, Math.PI * 2); ctx.fill();
-        ctx.font = '9px Segoe UI'; ctx.fillText("INFINITY BREAK", leftCenterX, leftCenterY + 4);
-
-        ctx.strokeStyle = 'rgba(102, 252, 241, 0.15)'; ctx.lineWidth = 1.5;
-        let arms = 6;
-        for (let i = 0; i < arms; i++) {
-            let baseAngle = (i * Math.PI * 2) / arms + state.time * 0.4; ctx.beginPath();
-            for (let r = viewRadius; r > 20; r -= 3) {
-                // Instability jitter ripples the black hole flow if Tesla nodes are unaligned
-                let tJitter = state.jitter * 0.01 * Math.sin(r * 0.2 - state.time * 4);
-                let theta = baseAngle + (viewRadius - r) * (0.02 * state.fluidDensity) + tJitter;
-                let x = rightCenterX + Math.cos(theta) * r; let y = rightCenterY + Math.sin(theta) * r;
-                if (r === viewRadius) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-        }
-
-        let leakAlpha = Math.max(0, Math.min(1, 0.25 * Math.sin(state.time * 2)));
-        ctx.strokeStyle = `rgba(255, 140, 0, ${leakAlpha})`; ctx.lineWidth = 1.2;
-        for (let r = 25; r < viewRadius; r += 20) {
-            ctx.beginPath(); ctx.arc(rightCenterX, rightCenterY, r + (state.time * 12) % 20, 0, Math.PI * 2); ctx.stroke();
-        }
-
-        let coreGlow = ctx.createRadialGradient(rightCenterX, rightCenterY, 0, rightCenterX, rightCenterY, 22);
-        coreGlow.addColorStop(0, '#ffffff'); 
-        let rightAlpha = Math.max(0, Math.min(1, 0.8 * (state.nonlinearity / 3)));
-        coreGlow.addColorStop(0.3, `rgba(69, 243, 255, ${rightAlpha})`); coreGlow.addColorStop(1, 'rgba(11, 12, 16, 0)');
-        ctx.fillStyle = coreGlow; ctx.beginPath(); ctx.arc(rightCenterX, rightCenterY, 22, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#66fcf1'; ctx.font = '9px Segoe UI'; ctx.fillText("STABLE BOUND STATE CORE", rightCenterX, rightCenterY + 4);
-        ctx.textAlign = 'left';
-    }
-
-    function drawSynchronicityPulse(cx, cy, maxR) {
-        let pulseRadius = maxR * (1 - state.pulseActive) * 1.5;
-        let pulseAlpha = Math.max(0, Math.min(1, state.pulseActive));
-        ctx.strokeStyle = `rgba(102, 252, 241, ${pulseAlpha})`; ctx.lineWidth = 3 * state.pulseActive;
-        ctx.beginPath(); ctx.arc(cx, cy, pulseRadius, 0, Math.PI * 2); ctx.stroke();
-    }
-
-    animate();
-</script>
-
-</body>
-</html>
+        gradient.addColorStop(0, `rgba(69, 243, 255, ${gradAlpha})`); gradient.addColorStop(0.3, `rgba
