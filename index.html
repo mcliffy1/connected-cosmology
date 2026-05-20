@@ -167,67 +167,24 @@
             color: #c5c6c7;
         }
 
-        /* --- RESPONSIVE MEDIA BREAKPOINTS --- */
+        /* --- RESPONSIVE BREAKPOINTS --- */
         @media (max-width: 768px) {
-            #container {
-                flex-direction: column;
-            }
-            #sidebar {
-                width: 100vw;
-                height: 42%;
-                border-right: none;
-                border-bottom: 2px solid #45f3ff;
-                padding: 12px;
-                gap: 10px;
-            }
-            h2 {
-                font-size: 1.1em;
-                padding-bottom: 6px;
-                margin-bottom: 2px;
-            }
-            .btn {
-                padding: 7px;
-                font-size: 0.75em;
-            }
-            #hud {
-                display: none !important;
-                opacity: 0 !important;
-                visibility: hidden !important;
-            }
-            #canvas-container {
-                height: 58%;
-                width: 100vw;
-            }
+            #container { flex-direction: column; }
+            #sidebar { width: 100vw; height: 45%; border-right: none; border-bottom: 2px solid #45f3ff; padding: 12px; gap: 10px; }
+            h2 { font-size: 1.1em; padding-bottom: 6px; margin-bottom: 2px; }
+            .btn { padding: 7px; font-size: 0.75em; }
+            #hud { display: none !important; opacity: 0 !important; visibility: hidden !important; }
+            #canvas-container { height: 55%; width: 100vw; }
         }
-
         @media (max-height: 500px) {
-            #sidebar {
-                width: 260px;
-                padding: 10px;
-                gap: 8px;
-            }
-            h2 {
-                font-size: 1.0em;
-                padding-bottom: 4px;
-            }
-            .btn {
-                padding: 6px;
-                font-size: 0.7em;
-            }
-            #hud {
-                display: none !important;
-                opacity: 0 !important;
-                visibility: hidden !important;
-            }
-            #framework-desc {
-                display: none;
-            }
+            #sidebar { width: 260px; padding: 10px; gap: 8px; }
+            h2 { font-size: 1.0em; padding-bottom: 4px; }
+            .btn { padding: 6px; font-size: 0.7em; }
+            #hud { display: none !important; opacity: 0 !important; visibility: hidden !important; }
+            #framework-desc { display: none; }
         }
-        
         @media (min-width: 769px) and (min-height: 501px) {
-            #sidebar-hud {
-                display: none;
-            }
+            #sidebar-hud { display: none; }
         }
     </style>
 </head>
@@ -235,7 +192,7 @@
 
 <div id="container">
     <div id="sidebar">
-        <h2>Soliton Universe </h2>
+        <h2>Soliton Universe v3.5</h2>
         
         <div class="control-group">
             <label>Scale Domain</label>
@@ -245,6 +202,11 @@
                 <button id="btn-bio" class="btn">Bio-Observer</button>
                 <button id="btn-blackhole" class="btn">Black Hole Lab</button>
             </div>
+        </div>
+
+        <div class="control-group">
+            <label>Tesla Harmonic Node <span id="val-tesla" class="value-display">9</span></label>
+            <input type="range" id="slider-tesla" min="0" max="12" step="0.1" value="9">
         </div>
 
         <div class="control-group" id="param-nonlinearity">
@@ -279,13 +241,10 @@
         <div id="framework-desc">
             <h3>Framework Mapping</h3>
             <div class="desc-block">
-                <span class="desc-title">Scale Domains:</span> Links macro cosmological structures, micro atomic geometries, and human biology straight to black hole vortex mechanics.
+                <span class="desc-title">Tesla Harmonic Node:</span> Sweeps across the cosmic matrix layout. Snapping the selector precisely onto 3, 6, or 9 triggers an inductive impedance match, phase-locking field coherence.
             </div>
             <div class="desc-block">
-                <span class="desc-title">Field Nonlinearity:</span> On the left, it has no effect on the dead singularity. On the right, it dictates fluid compression, self-limiting the density spike to prevent a geometric tear.
-            </div>
-            <div class="desc-block">
-                <span class="desc-title">Plenum Density:</span> Governs the fluid inflow rate. Pushing this up accelerates the acoustic horizon velocity, increasing the radiating feedback loop of the active soliton.
+                <span class="desc-title">Field Nonlinearity:</span> Dictates spatial self-stabilization across fluid mediums.
             </div>
         </div>
     </div>
@@ -307,6 +266,8 @@
     const btnMicro = document.getElementById('btn-micro');
     const btnBio = document.getElementById('btn-bio');
     const btnBlackHole = document.getElementById('btn-blackhole');
+    
+    const sliderTesla = document.getElementById('slider-tesla');
     const sliderNonlinear = document.getElementById('slider-nonlinear');
     const sliderDensity = document.getElementById('slider-density');
     const sliderFreq = document.getElementById('slider-freq');
@@ -318,6 +279,7 @@
     const mobHudTitle = document.getElementById('mob-hud-title');
     const mobHudText = document.getElementById('mob-hud-text');
 
+    const valTesla = document.getElementById('val-tesla');
     const valNonlinear = document.getElementById('val-nonlinear');
     const valDensity = document.getElementById('val-density');
     const valFreq = document.getElementById('val-freq');
@@ -326,9 +288,11 @@
         mode: 'macro',
         time: 0,
         pulseActive: 0,
+        teslaNode: 9.0,
         nonlinearity: 3.0,
         fluidDensity: 1.2,
-        freqIndex: 1
+        freqIndex: 1,
+        jitter: 0
     };
 
     function resize() {
@@ -357,32 +321,47 @@
     }
 
     function updateStateValues() {
+        state.teslaNode = parseFloat(sliderTesla.value) || 9.0;
         state.nonlinearity = parseFloat(sliderNonlinear.value) || 3.0;
         state.fluidDensity = parseFloat(sliderDensity.value) || 1.2;
         state.freqIndex = parseInt(sliderFreq.value) || 1;
 
+        valTesla.innerText = state.teslaNode.toFixed(1);
         valNonlinear.innerText = state.nonlinearity.toFixed(1);
         valDensity.innerText = state.fluidDensity.toFixed(2);
         valFreq.innerText = state.freqIndex;
 
-        let stability = 0;
+        // Calculate proximity to Tesla's lock-in channels (3, 6, 9)
+        let distTo3 = Math.abs(state.teslaNode - 3.0);
+        let distTo6 = Math.abs(state.teslaNode - 6.0);
+        let distTo9 = Math.abs(state.teslaNode - 9.0);
+        let minTeslaDist = Math.min(distTo3, distTo6, distTo9);
+
+        // Map jitter based on tuning dissonance
+        state.jitter = minTeslaDist > 0.4 ? (minTeslaDist * 4) : 0;
+
+        let baseStability = 0;
         if (state.mode === 'macro') {
-            stability = Math.max(10, 100 - Math.abs(state.nonlinearity - state.fluidDensity * 2) * 35);
+            baseStability = 100 - Math.abs(state.nonlinearity - state.fluidDensity * 2) * 35;
         } else if (state.mode === 'micro') {
-            stability = Math.max(10, (state.fluidDensity * 35) + (state.freqIndex * 10));
+            baseStability = (state.fluidDensity * 35) + (state.freqIndex * 10);
         } else if (state.mode === 'bio') {
-            stability = Math.max(15, 100 - Math.abs(state.nonlinearity - 3.5) * 20 - Math.abs(state.fluidDensity - 1.2) * 25);
+            baseStability = 100 - Math.abs(state.nonlinearity - 3.5) * 20 - Math.abs(state.fluidDensity - 1.2) * 25;
         } else {
-            stability = Math.max(40, state.nonlinearity * 15 + state.fluidDensity * 10);
+            baseStability = state.nonlinearity * 15 + state.fluidDensity * 10;
         }
+
+        // Interlock stability to Tesla tuning accuracy matrix
+        let coherence = baseStability * (1 - (minTeslaDist / 6.0));
+        coherence = Math.max(5, Math.min(100, coherence));
 
         if (state.pulseActive > 0) {
-            stability = stability + (100 - stability) * state.pulseActive;
+            coherence = coherence + (100 - coherence) * state.pulseActive;
         }
-        rtiFill.style.width = `${Math.min(100, stability)}%`;
+        rtiFill.style.width = `${coherence.toFixed(0)}%`;
     }
 
-    [sliderNonlinear, sliderDensity, sliderFreq].forEach(slider => {
+    [sliderTesla, sliderNonlinear, sliderDensity, sliderFreq].forEach(slider => {
         slider.addEventListener('input', updateStateValues);
     });
     updateStateValues();
@@ -403,14 +382,20 @@
             updateStateValues();
         }
 
-        state.time += 0.025 * (1 - state.pulseActive * 0.5); 
+        // Apply a visual phase distortion if system jitter is loose
+        let localTimeDelta = 0.025 * (1 - state.pulseActive * 0.5);
+        state.time += localTimeDelta; 
+
+        // Apply visual noise effect derived from state jitter constraints
+        let currentCenterX = centerX + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
+        let currentCenterY = centerY + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
 
         if (state.mode === 'macro') {
-            drawMacroSoliton(centerX, centerY, maxRadius, state.nonlinearity, state.fluidDensity);
+            drawMacroSoliton(currentCenterX, currentCenterY, maxRadius, state.nonlinearity, state.fluidDensity);
         } else if (state.mode === 'micro') {
             drawMicroAtom(centerX, centerY, maxRadius, state.freqIndex, state.fluidDensity);
         } else if (state.mode === 'bio') {
-            drawBioObserver(centerX, centerY, maxRadius, state.nonlinearity, state.fluidDensity, state.freqIndex);
+            drawBioObserver(currentCenterX, currentCenterY, maxRadius, state.nonlinearity, state.fluidDensity, state.freqIndex);
         } else {
             drawBlackHoleLab(maxRadius);
         }
@@ -423,7 +408,6 @@
     }
 
     function drawMacroSoliton(cx, cy, maxR, nl, dens) {
-        // RADIAL BACKDROP LINES: Shifted to a high-contrast glowing orange
         ctx.strokeStyle = 'rgba(255, 140, 0, 0.06)'; ctx.lineWidth = 1;
         for (let r = 50; r < maxR * 1.5; r += 40) { ctx.beginPath(); ctx.arc(cx, cy, r + Math.sin(state.time + r*0.02)*5, 0, Math.PI * 2); ctx.stroke(); }
         
@@ -431,7 +415,8 @@
         for (let a = 0; a < numArms; a++) {
             let armAngle = (a * Math.PI * 2) / numArms + state.time * 0.1; ctx.beginPath();
             for (let r = maxR; r > 5; r -= 4) {
-                let theta = armAngle + (maxR - r) * (0.01 * nl * dens);
+                let waveMod = state.jitter * 0.005 * Math.sin(r * 0.1 - state.time * 5);
+                let theta = armAngle + (maxR - r) * (0.01 * nl * dens) + waveMod;
                 let x = cx + Math.cos(theta) * r; let y = cy + Math.sin(theta) * r;
                 let alpha = Math.max(0, Math.min(1, (1 - r / maxR) * 0.6)); ctx.strokeStyle = `rgba(69, 243, 255, ${alpha})`;
                 if (r === maxR) ctx.moveTo(x, y); else ctx.lineTo(x, y);
@@ -453,7 +438,6 @@
     }
 
     function drawMicroAtom(cx, cy, maxR, n, dens) {
-        // PRESERVED UNTOUCHED: Native crisp cyan/teal laser nodes
         let totalRays = 180; ctx.lineWidth = 2;
         for (let i = 0; i < totalRays; i++) {
             let angle = (i * Math.PI * 2) / totalRays; let radialPressure = Math.sin(n * state.time * 1.5) * Math.cos(n * angle * 2); let nodeRadius = maxR * 0.5 + radialPressure * (25 * dens);
@@ -473,17 +457,14 @@
         ctx.strokeStyle = 'rgba(69, 243, 255, 0.03)'; ctx.lineWidth = 1; let driftX = Math.sin(state.time * 0.5) * 20 * (1 - state.pulseActive);
         for (let i = -maxR; i < maxR * 1.5; i += 30) { ctx.beginPath(); ctx.moveTo(cx - maxR + driftX, cy + i); ctx.lineTo(cx + maxR + driftX, cy - i); ctx.stroke(); }
         
-        let totalLoops = 24 + (freq * 6); ctx.lineWidth = 1.5; let noiseFactor = (5 - nl) * 8 * (1 - state.pulseActive);
+        let totalLoops = 24 + (freq * 6); ctx.lineWidth = 1.5; let noiseFactor = (5 - nl) * 8 * (1 - state.pulseActive) + (state.jitter * 2);
         for (let i = 0; i < totalLoops; i++) {
             let angle = (i * Math.PI * 2) / totalLoops + state.time * 0.2; ctx.beginPath();
             for (let t = -Math.PI; t <= Math.PI; t += 0.1) {
                 let r = (maxR * 0.4) * (1 + 0.3 * Math.sin(freq * t + state.time)); let noise = Math.sin(t * 12 + i) * noiseFactor;
                 let x = cx + Math.cos(angle) * (r + noise) * Math.cos(t); let y = cy + Math.sin(angle) * (r + noise) * Math.cos(t) + Math.sin(t) * (maxR * 0.2);
                 let alpha = Math.max(0, Math.min(1, (Math.cos(t) + 1) * 0.2 + 0.1)); 
-                
-                // BIOLOGICAL FIELD STRANDS: Shifted to a vibrant warm gold/yellow profile
                 ctx.strokeStyle = `rgba(255, 215, 0, ${alpha})`;
-                
                 if (t === -Math.PI) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.stroke();
@@ -492,71 +473,50 @@
     }
 
     function drawBlackHoleLab(maxR) {
-        const w = canvas.width;
-        const h = canvas.height;
-        const isPortrait = h > w;
-        
-        const leftCenterX = isPortrait ? w / 2 : w * 0.35;
-        const leftCenterY = isPortrait ? h * 0.26 : h / 2;
-        const rightCenterX = isPortrait ? w / 2 : w * 0.65;
-        const rightCenterY = isPortrait ? h * 0.74 : h / 2;
+        const w = canvas.width; const h = canvas.height; const isPortrait = h > w;
+        const leftCenterX = isPortrait ? w / 2 : w * 0.35; const leftCenterY = isPortrait ? h * 0.26 : h / 2;
+        const rightCenterX = isPortrait ? w / 2 : w * 0.65; const rightCenterY = isPortrait ? h * 0.74 : h / 2;
         const viewRadius = isPortrait ? maxR * 0.45 : maxR * 0.65;
 
-        ctx.strokeStyle = 'rgba(69, 243, 255, 0.2)';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath(); 
-        if (isPortrait) {
-            ctx.moveTo(0, h * 0.5); ctx.lineTo(w, h * 0.5);
-        } else {
-            ctx.moveTo(w * 0.5, 0); ctx.lineTo(w * 0.5, h);
-        }
-        ctx.stroke();
-        ctx.setLineDash([]);
+        ctx.strokeStyle = 'rgba(69, 243, 255, 0.2)'; ctx.lineWidth = 1; ctx.setLineDash([5, 5]); ctx.beginPath(); 
+        if (isPortrait) { ctx.moveTo(0, h * 0.5); ctx.lineTo(w, h * 0.5); } else { ctx.moveTo(w * 0.5, 0); ctx.lineTo(w * 0.5, h); }
+        ctx.stroke(); ctx.setLineDash([]);
 
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-        ctx.font = 'bold 11px Segoe UI';
-        ctx.textAlign = 'center';
-        
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.font = 'bold 11px Segoe UI'; ctx.textAlign = 'center';
         let textOffset = isPortrait ? viewRadius + 14 : viewRadius + 16;
         ctx.fillText("STANDARD GENERAL RELATIVITY", leftCenterX, leftCenterY - textOffset);
         ctx.fillText("SOLITON RESONANCE FRAMEWORK", rightCenterX, rightCenterY - textOffset);
 
-        // --- LEFT SIDE: CLASSICAL BLACK HOLE ---
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'; ctx.lineWidth = 1;
         let classicalPulse = Math.sin(state.time * 0.5) * 2; 
         for (let i = -8; i <= 8; i++) {
             ctx.beginPath();
             for (let r = viewRadius; r > 15; r -= 5) {
-                let warp = Math.pow(30 / r, 2) * (20 + classicalPulse); 
-                let angle = (i * Math.PI) / 8;
-                let x = leftCenterX + Math.cos(angle) * r;
-                let y = leftCenterY + Math.sin(angle) * r + warp;
+                let warp = Math.pow(30 / r, 2) * (20 + classicalPulse); let angle = (i * Math.PI) / 8;
+                let x = leftCenterX + Math.cos(angle) * r; let y = leftCenterY + Math.sin(angle) * r + warp;
                 if (r === viewRadius) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.stroke();
         }
         ctx.fillStyle = '#000000'; ctx.strokeStyle = 'rgba(255, 0, 100, 0.5)'; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(leftCenterX, leftCenterY, 22, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        
         ctx.fillStyle = '#ff0055'; ctx.beginPath(); ctx.arc(leftCenterX, leftCenterY, 2, 0, Math.PI * 2); ctx.fill();
         ctx.font = '9px Segoe UI'; ctx.fillText("INFINITY BREAK", leftCenterX, leftCenterY + 4);
 
-        // --- RIGHT SIDE: SUPERFLUID VORTEX SOLITON ---
         ctx.strokeStyle = 'rgba(102, 252, 241, 0.15)'; ctx.lineWidth = 1.5;
         let arms = 6;
         for (let i = 0; i < arms; i++) {
             let baseAngle = (i * Math.PI * 2) / arms + state.time * 0.4; ctx.beginPath();
             for (let r = viewRadius; r > 20; r -= 3) {
-                let theta = baseAngle + (viewRadius - r) * (0.02 * state.fluidDensity);
+                // Instability jitter ripples the black hole flow if Tesla nodes are unaligned
+                let tJitter = state.jitter * 0.01 * Math.sin(r * 0.2 - state.time * 4);
+                let theta = baseAngle + (viewRadius - r) * (0.02 * state.fluidDensity) + tJitter;
                 let x = rightCenterX + Math.cos(theta) * r; let y = rightCenterY + Math.sin(theta) * r;
                 if (r === viewRadius) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.stroke();
         }
 
-        // HAWKING LEAKAGE WAVES: Shifted to a high-visibility glowing orange ripple
         let leakAlpha = Math.max(0, Math.min(1, 0.25 * Math.sin(state.time * 2)));
         ctx.strokeStyle = `rgba(255, 140, 0, ${leakAlpha})`; ctx.lineWidth = 1.2;
         for (let r = 25; r < viewRadius; r += 20) {
@@ -568,7 +528,6 @@
         let rightAlpha = Math.max(0, Math.min(1, 0.8 * (state.nonlinearity / 3)));
         coreGlow.addColorStop(0.3, `rgba(69, 243, 255, ${rightAlpha})`); coreGlow.addColorStop(1, 'rgba(11, 12, 16, 0)');
         ctx.fillStyle = coreGlow; ctx.beginPath(); ctx.arc(rightCenterX, rightCenterY, 22, 0, Math.PI * 2); ctx.fill();
-        
         ctx.fillStyle = '#66fcf1'; ctx.font = '9px Segoe UI'; ctx.fillText("STABLE BOUND STATE CORE", rightCenterX, rightCenterY + 4);
         ctx.textAlign = 'left';
     }
