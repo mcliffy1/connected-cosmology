@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Soliton Resonance Framework Simulation</title>
     <style>
         body {
@@ -14,12 +15,13 @@
         }
         #container {
             display: flex;
+            flex-direction: row;
             width: 100vw;
             height: 100vh;
         }
         #sidebar {
             width: 350px;
-            background: rgba(31, 40, 51, 0.85);
+            background: rgba(31, 40, 51, 0.9);
             backdrop-filter: blur(10px);
             border-right: 2px solid #45f3ff;
             padding: 20px;
@@ -34,7 +36,7 @@
         h2 {
             margin-top: 0;
             color: #45f3ff;
-            font-size: 1.4em;
+            font-size: 1.3em;
             text-transform: uppercase;
             letter-spacing: 2px;
             border-bottom: 1px solid #45f3ff;
@@ -58,9 +60,6 @@
             grid-template-columns: 1fr 1fr;
             gap: 6px;
         }
-        .scale-buttons button:last-child {
-            grid-column: span 2;
-        }
         label {
             font-size: 0.85em;
             color: #66fcf1;
@@ -76,46 +75,40 @@
             -webkit-appearance: none;
             width: 100%;
             background: #0b0c10;
-            height: 6px;
-            border-radius: 3px;
+            height: 10px; /* Thicker track for mobile touch navigation */
+            border-radius: 5px;
             outline: none;
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 22px; /* Larger hit-box targets for human fingers */
+            height: 22px;
             border-radius: 50%;
             background: #45f3ff;
             cursor: pointer;
             box-shadow: 0 0 8px #45f3ff;
-            transition: 0.2s;
-        }
-        input[type="range"]::-webkit-slider-thumb:hover {
-            background: #66fcf1;
-            box-shadow: 0 0 12px #66fcf1;
         }
         .btn {
             background: transparent;
             border: 1px solid #45f3ff;
             color: #45f3ff;
-            padding: 9px;
+            padding: 10px; /* Enlarged touch padding */
             border-radius: 4px;
             cursor: pointer;
+            font-size: 0.85em;
             font-weight: bold;
             text-transform: uppercase;
-            transition: 0.3s;
-            margin-top: 2px;
+            transition: 0.2s;
         }
         .btn:hover {
             background: #45f3ff;
             color: #0b0c10;
-            box-shadow: 0 0 15px rgba(69, 243, 255, 0.4);
         }
         .btn.active {
             background: #66fcf1;
             color: #0b0c10;
             border-color: #66fcf1;
-            box-shadow: 0 0 15px rgba(102, 252, 241, 0.4);
+            box-shadow: 0 0 10px rgba(102, 252, 241, 0.4);
         }
         #framework-desc {
             border-top: 1px dashed rgba(69, 243, 255, 0.3);
@@ -146,11 +139,12 @@
         }
         #hud {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(11, 12, 16, 0.8);
+            bottom: 15px;
+            right: 15px;
+            left: 15px; /* Spans fluidly across screens on mobile */
+            background: rgba(11, 12, 16, 0.85);
             border: 1px solid #66fcf1;
-            padding: 15px;
+            padding: 12px;
             border-radius: 6px;
             pointer-events: none;
             max-width: 400px;
@@ -158,13 +152,55 @@
         .hud-title {
             color: #66fcf1;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             text-transform: uppercase;
+            font-size: 0.9em;
         }
         .hud-text {
-            font-size: 0.9em;
-            line-height: 1.4em;
+            font-size: 0.8em;
+            line-height: 1.3em;
             color: #c5c6c7;
+        }
+
+        /* --- MOBILE MEDIA QUERY MATRIX INTERFACE --- */
+        @media (max-width: 768px) {
+            #container {
+                flex-direction: column; /* Stacks interface vertically on phones */
+            }
+            #sidebar {
+                width: 100vw;
+                height: 42%; /* Reserves bottom space for rendering engine execution */
+                border-right: none;
+                border-bottom: 2px solid #45f3ff;
+                padding: 12px;
+                gap: 10px;
+            }
+            h2 {
+                font-size: 1.1em;
+                padding-bottom: 6px;
+                margin-bottom: 2px;
+            }
+            .scale-buttons {
+                grid-template-columns: 1fr 1fr;
+            }
+            .btn {
+                padding: 6px;
+                font-size: 0.75em;
+            }
+            #framework-desc {
+                display: none; /* Safely clears technical paragraphs to prevent mobile scroll jams */
+            }
+            #canvas-container {
+                height: 58%;
+                width: 100vw;
+            }
+            #hud {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                padding: 8px;
+            }
         }
     </style>
 </head>
@@ -201,7 +237,7 @@
 
         <div class="control-group">
             <label>Phase Coherence Status</label>
-            <div id="rti-bar" style="height:8px; background:#0b0c10; border-radius:4px; position:relative; overflow:hidden; border:1px solid #45f3ff;">
+            <div id="rti-bar" style="height:6px; background:#0b0c10; border-radius:3px; position:relative; overflow:hidden; border:1px solid #45f3ff;">
                 <div id="rti-fill" style="height:100%; width:80%; background:linear-gradient(90deg, #45f3ff, #66fcf1); transition:0.1s; box-shadow:0 0 8px #45f3ff;"></div>
             </div>
         </div>
@@ -214,10 +250,10 @@
                 <span class="desc-title">Scale Domains:</span> Links macro cosmological structures, micro atomic geometries, and human biology straight to black hole vortex mechanics.
             </div>
             <div class="desc-block">
-                <span class="desc-title">Field Nonlinearity:</span> On the left, it has no effect on the dead singularity. On the right, it dictates fluid compression, self-limiting the density spike to prevent a geometric tear.
+                <span class="desc-title">Field Nonlinearity:</span> Dictates spatial self-stabilization across fluid mediums.
             </div>
             <div class="desc-block">
-                <span class="desc-title">Plenum Density:</span> Governs the fluid inflow rate. Pushing this up accelerates the acoustic horizon velocity, increasing the radiating feedback loop of the active soliton.
+                <span class="desc-title">Plenum Density:</span> Models changes in the dynamic vacuum's acoustic/refractive template.
             </div>
         </div>
     </div>
@@ -235,7 +271,6 @@
     const canvas = document.getElementById('universeCanvas');
     const ctx = canvas.getContext('2d');
     
-    // UI Elements
     const btnMacro = document.getElementById('btn-macro');
     const btnMicro = document.getElementById('btn-micro');
     const btnBio = document.getElementById('btn-bio');
@@ -248,12 +283,10 @@
     const hudTitle = document.getElementById('hud-title');
     const hudText = document.getElementById('hud-text');
 
-    // Value Displays
     const valNonlinear = document.getElementById('val-nonlinear');
     const valDensity = document.getElementById('val-density');
     const valFreq = document.getElementById('val-freq');
 
-    // Central state engine
     const state = {
         mode: 'macro',
         time: 0,
@@ -270,7 +303,6 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // Mode Switching Listeners
     btnMacro.addEventListener('click', () => { setMode('macro', btnMacro, "Galactic Soliton Wave Packet", "Observing flat velocity curves generated entirely by the geometric eigenvalue of the nonlinear plenum fluid. Spatial stabilization balances cosmic dispersion."); });
     btnMicro.addEventListener('click', () => { setMode('micro', btnMicro, "Acoustic Bound State (White Atom)", "Hydrogen orbital rendering derived from emergent quantization in a dispersive medium. Matter manifests as a localized, spherical 3D cymatic standing wave."); });
     btnBio.addEventListener('click', () => { setMode('bio', btnBio, "Biological Transducer (The Observer)", "Visualizing heart-brain toroidal field emissions phase-locking with the vacuum plenum. Coherent intent decreases local fluid viscosity, aligning spacetime vectors."); });
@@ -412,90 +444,87 @@
     function drawBlackHoleLab(maxR) {
         const w = canvas.width;
         const h = canvas.height;
-        const leftCenterX = w * 0.35;
-        const rightCenterX = w * 0.65;
-        const cy = h / 2;
-        const viewRadius = maxR * 0.7;
+        
+        // Detect portrait layouts to stack split screen vertically on phones
+        const isPortrait = h > w;
+        
+        const leftCenterX = isPortrait ? w / 2 : w * 0.35;
+        const leftCenterY = isPortrait ? h * 0.28 : h / 2;
+        const rightCenterX = isPortrait ? w / 2 : w * 0.65;
+        const rightCenterY = isPortrait ? h * 0.72 : h / 2;
+        const viewRadius = isPortrait ? maxR * 0.5 : maxR * 0.7;
 
-        // Draw Split Center Separation Line
+        // Draw Center Split Separator Line
         ctx.strokeStyle = 'rgba(69, 243, 255, 0.2)';
         ctx.lineWidth = 1;
         ctx.setLineDash([5, 5]);
-        ctx.beginPath(); ctx.moveTo(w * 0.5, 0); ctx.lineTo(w * 0.5, h); ctx.stroke();
+        ctx.beginPath(); 
+        if (isPortrait) {
+            ctx.moveTo(0, h * 0.5); ctx.lineTo(w, h * 0.5);
+        } else {
+            ctx.moveTo(w * 0.5, 0); ctx.lineTo(w * 0.5, h);
+        }
+        ctx.stroke();
         ctx.setLineDash([]);
 
         // Labels
         ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-        ctx.font = 'bold 12px Segoe UI';
+        ctx.font = 'bold 11px Segoe UI';
         ctx.textAlign = 'center';
-        ctx.fillText("STANDARD GENERAL RELATIVITY", leftCenterX, cy - viewRadius - 20);
-        ctx.fillText("SOLITON RESONANCE FRAMEWORK", rightCenterX, cy - viewRadius - 20);
+        ctx.fillText("STANDARD GENERAL RELATIVITY", leftCenterX, leftCenterY - viewRadius - 12);
+        ctx.fillText("SOLITON RESONANCE FRAMEWORK", rightCenterX, rightCenterY - viewRadius - 12);
 
-        // --- LEFT SIDE: CLASSICAL BLACK HOLE (Now with subtle time oscillation) ---
+        // --- LEFT SIDE: CLASSICAL BLACK HOLE ---
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
         ctx.lineWidth = 1;
-        // Subtle rhythmic pulsing of the spatial coordinate mesh to show active rendering
         let classicalPulse = Math.sin(state.time * 0.5) * 2; 
         for (let i = -8; i <= 8; i++) {
             ctx.beginPath();
-            for (let r = viewRadius; r > 20; r -= 5) {
-                let warp = Math.pow(40 / r, 2) * (30 + classicalPulse); 
+            for (let r = viewRadius; r > 15; r -= 5) {
+                let warp = Math.pow(30 / r, 2) * (20 + classicalPulse); 
                 let angle = (i * Math.PI) / 8;
                 let x = leftCenterX + Math.cos(angle) * r;
-                let y = cy + Math.sin(angle) * r + warp;
+                let y = leftCenterY + Math.sin(angle) * r + warp;
                 if (r === viewRadius) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.stroke();
         }
-        // Sharp Event Horizon Void Boundary
-        ctx.fillStyle = '#000000';
-        ctx.strokeStyle = 'rgba(255, 0, 100, 0.5)';
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(leftCenterX, cy, 35, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#000000'; ctx.strokeStyle = 'rgba(255, 0, 100, 0.5)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(leftCenterX, leftCenterY, 25, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         
-        // Zero-dimensional singularity pixel
-        ctx.fillStyle = '#ff0055';
-        ctx.beginPath(); ctx.arc(leftCenterX, cy, 2, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ff0055'; ctx.font = '10px Segoe UI';
-        ctx.fillText("INFINITY BREAK", leftCenterX, cy + 6);
+        ctx.fillStyle = '#ff0055'; ctx.beginPath(); ctx.arc(leftCenterX, leftCenterY, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.font = '9px Segoe UI'; ctx.fillText("INFINITY BREAK", leftCenterX, leftCenterY + 5);
 
         // --- RIGHT SIDE: SUPERFLUID VORTEX SOLITON ---
-        ctx.strokeStyle = 'rgba(102, 252, 241, 0.15)';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(102, 252, 241, 0.15)'; ctx.lineWidth = 1.5;
         let arms = 6;
         for (let i = 0; i < arms; i++) {
-            let baseAngle = (i * Math.PI * 2) / arms + state.time * 0.4;
-            ctx.beginPath();
-            for (let r = viewRadius; r > 30; r -= 3) {
+            let baseAngle = (i * Math.PI * 2) / arms + state.time * 0.4; ctx.beginPath();
+            for (let r = viewRadius; r > 20; r -= 3) {
                 let theta = baseAngle + (viewRadius - r) * (0.02 * state.fluidDensity);
-                let x = rightCenterX + Math.cos(theta) * r;
-                let y = cy + Math.sin(theta) * r;
+                let x = rightCenterX + Math.cos(theta) * r; let y = rightCenterY + Math.sin(theta) * r;
                 if (r === viewRadius) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.stroke();
         }
 
-        // Radiating Dispersive Wave Leakage (Hawking Feedback Loop)
-        ctx.strokeStyle = `rgba(69, 243, 255, ${0.2 * Math.sin(state.time * 2)})`;
-        ctx.lineWidth = 1;
-        for (let r = 40; r < viewRadius; r += 25) {
-            ctx.beginPath();
-            ctx.arc(rightCenterX, cy, r + (state.time * 15) % 25, 0, Math.PI * 2);
-            ctx.stroke();
+        ctx.strokeStyle = `rgba(69, 243, 255, ${0.2 * Math.sin(state.time * 2)})`; ctx.lineWidth = 1;
+        for (let r = 30; r < viewRadius; r += 20) {
+            ctx.beginPath(); ctx.arc(rightCenterX, rightCenterY, r + (state.time * 12) % 20, 0, Math.PI * 2); ctx.stroke();
         }
 
-        // Localized Reactive Stop-Band Core
-        let coreGlow = ctx.createRadialGradient(rightCenterX, cy, 0, rightCenterX, cy, 35);
-        coreGlow.addColorStop(0, '#ffffff');
-        coreGlow.addColorStop(0.3, `rgba(69, 243, 255, ${0.8 * (state.nonlinearity / 3)})`);
-        coreGlow.addColorStop(1, 'rgba(11, 12, 16, 0)');
-        ctx.fillStyle = coreGlow;
-        ctx.beginPath(); ctx.arc(rightCenterX, cy, 35, 0, Math.PI * 2); ctx.fill();
+        let coreGlow = ctx.createRadialGradient(rightCenterX, rightCenterY, 0, rightCenterX, rightCenterY, 25);
+        coreGlow.addColorStop(0, '#ffffff'); coreGlow.addColorStop(0.3, `rgba(69, 243, 255, ${0.8 * (state.nonlinearity / 3)})`); coreGlow.addColorStop(1, 'rgba(11, 12, 16, 0)');
+        ctx.fillStyle = coreGlow; ctx.beginPath(); ctx.arc(rightCenterX, rightCenterY, 25, 0, Math.PI * 2); ctx.fill();
         
-        ctx.fillStyle = '#66fcf1'; ctx.font = '10px Segoe UI';
-        ctx.fillText("STABLE BOUND STATE CORE", rightCenterX, cy + 6);
-
+        ctx.fillStyle = '#66fcf1'; ctx.font = '9px Segoe UI'; ctx.fillText("STABLE BOUND STATE CORE", rightCenterX, rightCenterY + 5);
         ctx.textAlign = 'left';
+    }
+
+    function drawSynchronicityPulse(cx, cy, maxR) {
+        let pulseRadius = maxR * (1 - state.pulseActive) * 1.5;
+        ctx.strokeStyle = `rgba(102, 252, 241, ${state.pulseActive})`; ctx.lineWidth = 3 * state.pulseActive;
+        ctx.beginPath(); ctx.arc(cx, cy, pulseRadius, 0, Math.PI * 2); ctx.stroke();
     }
 
     animate();
