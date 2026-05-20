@@ -75,13 +75,13 @@
             -webkit-appearance: none;
             width: 100%;
             background: #0b0c10;
-            height: 10px; /* Thicker track for mobile touch navigation */
+            height: 10px;
             border-radius: 5px;
             outline: none;
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 22px; /* Larger hit-box targets for human fingers */
+            width: 22px;
             height: 22px;
             border-radius: 50%;
             background: #45f3ff;
@@ -92,7 +92,7 @@
             background: transparent;
             border: 1px solid #45f3ff;
             color: #45f3ff;
-            padding: 10px; /* Enlarged touch padding */
+            padding: 10px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.85em;
@@ -109,6 +109,11 @@
             color: #0b0c10;
             border-color: #66fcf1;
             box-shadow: 0 0 10px rgba(102, 252, 241, 0.4);
+        }
+        #sidebar-hud {
+            border-top: 1px solid #66fcf1;
+            margin-top: 5px;
+            padding-top: 12px;
         }
         #framework-desc {
             border-top: 1px dashed rgba(69, 243, 255, 0.3);
@@ -139,12 +144,11 @@
         }
         #hud {
             position: absolute;
-            bottom: 15px;
-            right: 15px;
-            left: 15px; /* Spans fluidly across screens on mobile */
+            bottom: 20px;
+            right: 20px;
             background: rgba(11, 12, 16, 0.85);
             border: 1px solid #66fcf1;
-            padding: 12px;
+            padding: 15px;
             border-radius: 6px;
             pointer-events: none;
             max-width: 400px;
@@ -154,22 +158,22 @@
             font-weight: bold;
             margin-bottom: 4px;
             text-transform: uppercase;
-            font-size: 0.9em;
+            font-size: 0.95em;
         }
         .hud-text {
-            font-size: 0.8em;
-            line-height: 1.3em;
+            font-size: 0.85em;
+            line-height: 1.4em;
             color: #c5c6c7;
         }
 
-        /* --- MOBILE MEDIA QUERY MATRIX INTERFACE --- */
+        /* --- MOBILE MEDIA QUERY RESCALING MATRIX --- */
         @media (max-width: 768px) {
             #container {
-                flex-direction: column; /* Stacks interface vertically on phones */
+                flex-direction: column;
             }
             #sidebar {
                 width: 100vw;
-                height: 42%; /* Reserves bottom space for rendering engine execution */
+                height: 42%;
                 border-right: none;
                 border-bottom: 2px solid #45f3ff;
                 padding: 12px;
@@ -180,26 +184,26 @@
                 padding-bottom: 6px;
                 margin-bottom: 2px;
             }
-            .scale-buttons {
-                grid-template-columns: 1fr 1fr;
-            }
             .btn {
-                padding: 6px;
+                padding: 7px;
                 font-size: 0.75em;
             }
+            #hud {
+                display: none; /* Disables floating desktop box completely on mobile viewports */
+            }
             #framework-desc {
-                display: none; /* Safely clears technical paragraphs to prevent mobile scroll jams */
+                border-top: 1px dashed rgba(69, 243, 255, 0.3);
             }
             #canvas-container {
                 height: 58%;
                 width: 100vw;
             }
-            #hud {
-                bottom: 10px;
-                right: 10px;
-                left: 10px;
-                max-width: none;
-                padding: 8px;
+        }
+        
+        /* Desktop-only description helper styles */
+        @media (min-width: 769px) {
+            #sidebar-hud {
+                display: none; /* Hides duplicate mobile list element when on broad screens */
             }
         }
     </style>
@@ -244,16 +248,21 @@
 
         <button id="btn-pulse" class="btn">Inject Synchronicity Pulse</button>
 
+        <div id="sidebar-hud">
+            <h3 id="mob-hud-title">Galactic Soliton Wave Packet</h3>
+            <p id="mob-hud-text" style="font-size: 0.8em; line-height: 1.4em; color: #c5c6c7; margin: 4px 0 0 0;">Observing flat velocity curves generated entirely by the geometric eigenvalue of the nonlinear plenum fluid. Spatial stabilization balances cosmic dispersion.</p>
+        </div>
+
         <div id="framework-desc">
             <h3>Framework Mapping</h3>
             <div class="desc-block">
                 <span class="desc-title">Scale Domains:</span> Links macro cosmological structures, micro atomic geometries, and human biology straight to black hole vortex mechanics.
             </div>
             <div class="desc-block">
-                <span class="desc-title">Field Nonlinearity:</span> Dictates spatial self-stabilization across fluid mediums.
+                <span class="desc-title">Field Nonlinearity:</span> On the left, it has no effect on the dead singularity. On the right, it dictates fluid compression, self-limiting the density spike to prevent a geometric tear.
             </div>
             <div class="desc-block">
-                <span class="desc-title">Plenum Density:</span> Models changes in the dynamic vacuum's acoustic/refractive template.
+                <span class="desc-title">Plenum Density:</span> Governs the fluid inflow rate. Pushing this up accelerates the acoustic horizon velocity, increasing the radiating feedback loop of the active soliton.
             </div>
         </div>
     </div>
@@ -280,8 +289,11 @@
     const sliderFreq = document.getElementById('slider-freq');
     const btnPulse = document.getElementById('btn-pulse');
     const rtiFill = document.getElementById('rti-fill');
+    
     const hudTitle = document.getElementById('hud-title');
     const hudText = document.getElementById('hud-text');
+    const mobHudTitle = document.getElementById('mob-hud-title');
+    const mobHudText = document.getElementById('mob-hud-text');
 
     const valNonlinear = document.getElementById('val-nonlinear');
     const valDensity = document.getElementById('val-density');
@@ -312,8 +324,13 @@
         state.mode = m;
         [btnMacro, btnMicro, btnBio, btnBlackHole].forEach(b => b.classList.remove('active'));
         activeBtn.classList.add('active');
+        
+        // Push descriptive updates simultaneously to both desktop and mobile locations
         hudTitle.innerText = title;
         hudText.innerText = text;
+        mobHudTitle.innerText = title;
+        mobHudText.innerText = text;
+        
         updateStateValues();
     }
 
@@ -445,16 +462,14 @@
         const w = canvas.width;
         const h = canvas.height;
         
-        // Detect portrait layouts to stack split screen vertically on phones
         const isPortrait = h > w;
         
         const leftCenterX = isPortrait ? w / 2 : w * 0.35;
-        const leftCenterY = isPortrait ? h * 0.28 : h / 2;
+        const leftCenterY = isPortrait ? h * 0.26 : h / 2;
         const rightCenterX = isPortrait ? w / 2 : w * 0.65;
-        const rightCenterY = isPortrait ? h * 0.72 : h / 2;
-        const viewRadius = isPortrait ? maxR * 0.5 : maxR * 0.7;
+        const rightCenterY = isPortrait ? h * 0.74 : h / 2;
+        const viewRadius = isPortrait ? maxR * 0.45 : maxR * 0.7;
 
-        // Draw Center Split Separator Line
         ctx.strokeStyle = 'rgba(69, 243, 255, 0.2)';
         ctx.lineWidth = 1;
         ctx.setLineDash([5, 5]);
@@ -467,12 +482,14 @@
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Labels
         ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
         ctx.font = 'bold 11px Segoe UI';
         ctx.textAlign = 'center';
-        ctx.fillText("STANDARD GENERAL RELATIVITY", leftCenterX, leftCenterY - viewRadius - 12);
-        ctx.fillText("SOLITON RESONANCE FRAMEWORK", rightCenterX, rightCenterY - viewRadius - 12);
+        
+        // Mobile layout forces labels slightly tighter to the horizontal division track
+        let textOffset = isPortrait ? viewRadius + 14 : viewRadius + 18;
+        ctx.fillText("STANDARD GENERAL RELATIVITY", leftCenterX, leftCenterY - textOffset);
+        ctx.fillText("SOLITON RESONANCE FRAMEWORK", rightCenterX, rightCenterY - textOffset);
 
         // --- LEFT SIDE: CLASSICAL BLACK HOLE ---
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
@@ -490,10 +507,10 @@
             ctx.stroke();
         }
         ctx.fillStyle = '#000000'; ctx.strokeStyle = 'rgba(255, 0, 100, 0.5)'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(leftCenterX, leftCenterY, 25, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(leftCenterX, leftCenterY, 22, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         
         ctx.fillStyle = '#ff0055'; ctx.beginPath(); ctx.arc(leftCenterX, leftCenterY, 2, 0, Math.PI * 2); ctx.fill();
-        ctx.font = '9px Segoe UI'; ctx.fillText("INFINITY BREAK", leftCenterX, leftCenterY + 5);
+        ctx.font = '9px Segoe UI'; ctx.fillText("INFINITY BREAK", leftCenterX, leftCenterY + 4);
 
         // --- RIGHT SIDE: SUPERFLUID VORTEX SOLITON ---
         ctx.strokeStyle = 'rgba(102, 252, 241, 0.15)'; ctx.lineWidth = 1.5;
@@ -509,26 +526,9 @@
         }
 
         ctx.strokeStyle = `rgba(69, 243, 255, ${0.2 * Math.sin(state.time * 2)})`; ctx.lineWidth = 1;
-        for (let r = 30; r < viewRadius; r += 20) {
+        for (let r = 25; r < viewRadius; r += 20) {
             ctx.beginPath(); ctx.arc(rightCenterX, rightCenterY, r + (state.time * 12) % 20, 0, Math.PI * 2); ctx.stroke();
         }
 
-        let coreGlow = ctx.createRadialGradient(rightCenterX, rightCenterY, 0, rightCenterX, rightCenterY, 25);
-        coreGlow.addColorStop(0, '#ffffff'); coreGlow.addColorStop(0.3, `rgba(69, 243, 255, ${0.8 * (state.nonlinearity / 3)})`); coreGlow.addColorStop(1, 'rgba(11, 12, 16, 0)');
-        ctx.fillStyle = coreGlow; ctx.beginPath(); ctx.arc(rightCenterX, rightCenterY, 25, 0, Math.PI * 2); ctx.fill();
-        
-        ctx.fillStyle = '#66fcf1'; ctx.font = '9px Segoe UI'; ctx.fillText("STABLE BOUND STATE CORE", rightCenterX, rightCenterY + 5);
-        ctx.textAlign = 'left';
-    }
-
-    function drawSynchronicityPulse(cx, cy, maxR) {
-        let pulseRadius = maxR * (1 - state.pulseActive) * 1.5;
-        ctx.strokeStyle = `rgba(102, 252, 241, ${state.pulseActive})`; ctx.lineWidth = 3 * state.pulseActive;
-        ctx.beginPath(); ctx.arc(cx, cy, pulseRadius, 0, Math.PI * 2); ctx.stroke();
-    }
-
-    animate();
-</script>
-
-</body>
-</html>
+        let coreGlow = ctx.createRadialGradient(rightCenterX, rightCenterY, 0, rightCenterX, rightCenterY, 22);
+        coreGlow.addColorStop(0, '#ffffff'); coreGlow.addColorStop(0.3, `rgba(69, 243, 255, ${0.8 * (state.nonlinearity / 3)})`); coreGlow.
