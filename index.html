@@ -192,7 +192,7 @@
 
 <div id="container">
     <div id="sidebar">
-        <h2>Soliton Universe </h2>
+        <h2>Soliton Universe v4.0</h2>
         
         <div class="control-group">
             <label>Scale Domain</label>
@@ -415,7 +415,8 @@
     }
 
     function drawMacroSoliton(cx, cy, maxR, nl, dens) {
-        ctx.strokeStyle = 'rgba(255, 140, 0, 0.06)'; ctx.lineWidth = 1;
+        // RADIAL BACKDROP LINES: Brightened contrast from 0.06 to 0.18 opacity
+        ctx.strokeStyle = 'rgba(255, 140, 0, 0.18)'; ctx.lineWidth = 1.2;
         for (let r = 50; r < maxR * 1.5; r += 40) { ctx.beginPath(); ctx.arc(cx, cy, r + Math.sin(state.time + r*0.02)*5, 0, Math.PI * 2); ctx.stroke(); }
         
         let numArms = 3; ctx.lineWidth = 1.5;
@@ -461,7 +462,8 @@
     }
 
     function drawBioObserver(cx, cy, maxR, nl, dens, freq) {
-        ctx.strokeStyle = 'rgba(69, 243, 255, 0.03)'; ctx.lineWidth = 1; let driftX = Math.sin(state.time * 0.5) * 20 * (1 - state.pulseActive);
+        // BACKGROUND MATRIX PENDULUM: Fired up opacity from 0.03 to 0.12, width to 2
+        ctx.strokeStyle = 'rgba(69, 243, 255, 0.12)'; ctx.lineWidth = 2; let driftX = Math.sin(state.time * 0.5) * 20 * (1 - state.pulseActive);
         for (let i = -maxR; i < maxR * 1.5; i += 30) { ctx.beginPath(); ctx.moveTo(cx - maxR + driftX, cy + i); ctx.lineTo(cx + maxR + driftX, cy - i); ctx.stroke(); }
         
         let totalLoops = 24 + (freq * 6); ctx.lineWidth = 1.5; let noiseFactor = (5 - nl) * 8 * (1 - state.pulseActive) + (state.jitter * 2);
@@ -545,7 +547,6 @@
         ctx.beginPath(); ctx.arc(cx, cy, pulseRadius, 0, Math.PI * 2); ctx.stroke();
     }
 
-    // Force script compilation context loops exclusively after window elements establish structure
     window.onload = function() {
         resize();
         updateStateValues();
