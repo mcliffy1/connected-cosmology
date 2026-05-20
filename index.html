@@ -351,7 +351,6 @@
         requestAnimationFrame(animate);
     }
 
-    // Previous drawing routines preserved identically
     function drawMacroSoliton(cx, cy, maxR, nl, dens) {
         ctx.strokeStyle = 'rgba(102, 252, 241, 0.04)'; ctx.lineWidth = 1;
         for (let r = 50; r < maxR * 1.5; r += 40) { ctx.beginPath(); ctx.arc(cx, cy, r + Math.sin(state.time + r*0.02)*5, 0, Math.PI * 2); ctx.stroke(); }
@@ -410,7 +409,6 @@
         let pulseGlow = 10 + state.pulseActive * 25; ctx.fillStyle = '#ffffff'; ctx.shadowBlur = pulseGlow; ctx.shadowColor = '#66fcf1'; ctx.beginPath(); ctx.arc(cx, cy, 6 + state.pulseActive * 4, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
     }
 
-    // New Split-Screen Comparison Laboratory Graphics
     function drawBlackHoleLab(maxR) {
         const w = canvas.width;
         const h = canvas.height;
@@ -433,14 +431,15 @@
         ctx.fillText("STANDARD GENERAL RELATIVITY", leftCenterX, cy - viewRadius - 20);
         ctx.fillText("SOLITON RESONANCE FRAMEWORK", rightCenterX, cy - viewRadius - 20);
 
-        // --- LEFT SIDE: CLASSICAL BLACK HOLE ---
-        // Gravity Grid Lines showing infinite structural distortion downwards
+        // --- LEFT SIDE: CLASSICAL BLACK HOLE (Now with subtle time oscillation) ---
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
         ctx.lineWidth = 1;
+        // Subtle rhythmic pulsing of the spatial coordinate mesh to show active rendering
+        let classicalPulse = Math.sin(state.time * 0.5) * 2; 
         for (let i = -8; i <= 8; i++) {
             ctx.beginPath();
             for (let r = viewRadius; r > 20; r -= 5) {
-                let warp = Math.pow(40 / r, 2) * 30; // Singularity gravity curvature warp
+                let warp = Math.pow(40 / r, 2) * (30 + classicalPulse); 
                 let angle = (i * Math.PI) / 8;
                 let x = leftCenterX + Math.cos(angle) * r;
                 let y = cy + Math.sin(angle) * r + warp;
@@ -461,7 +460,6 @@
         ctx.fillText("INFINITY BREAK", leftCenterX, cy + 6);
 
         // --- RIGHT SIDE: SUPERFLUID VORTEX SOLITON ---
-        // Smooth logarithmic fluid tracks flowing toward the eye
         ctx.strokeStyle = 'rgba(102, 252, 241, 0.15)';
         ctx.lineWidth = 1.5;
         let arms = 6;
@@ -486,7 +484,7 @@
             ctx.stroke();
         }
 
-        // Localized Reactive Stop-Band Core (Self-limiting core matrix)
+        // Localized Reactive Stop-Band Core
         let coreGlow = ctx.createRadialGradient(rightCenterX, cy, 0, rightCenterX, cy, 35);
         coreGlow.addColorStop(0, '#ffffff');
         coreGlow.addColorStop(0.3, `rgba(69, 243, 255, ${0.8 * (state.nonlinearity / 3)})`);
@@ -497,14 +495,7 @@
         ctx.fillStyle = '#66fcf1'; ctx.font = '10px Segoe UI';
         ctx.fillText("STABLE BOUND STATE CORE", rightCenterX, cy + 6);
 
-        // Reset alignment formatting for HUD elements
         ctx.textAlign = 'left';
-    }
-
-    function drawSynchronicityPulse(cx, cy, maxR) {
-        let pulseRadius = maxR * (1 - state.pulseActive) * 1.5;
-        ctx.strokeStyle = `rgba(102, 252, 241, ${state.pulseActive})`; ctx.lineWidth = 3 * state.pulseActive;
-        ctx.beginPath(); ctx.arc(cx, cy, pulseRadius, 0, Math.PI * 2); ctx.stroke();
     }
 
     animate();
