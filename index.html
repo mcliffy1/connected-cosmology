@@ -192,7 +192,7 @@
 
 <div id="container">
     <div id="sidebar">
-        <h2>Soliton Universe v4.1</h2>
+        <h2>Soliton Universe </h2>
         
         <div class="control-group">
             <label>Scale Domain</label>
@@ -461,8 +461,8 @@
     }
 
     function drawBioObserver(cx, cy, maxR, nl, dens, freq) {
-        // BACKGROUND MATRIX PENDULUM: Attenuated down to a clean, smoky 0.04 opacity, line width 1
-        ctx.strokeStyle = 'rgba(69, 243, 255, 0.04)'; ctx.lineWidth = 1; let driftX = Math.sin(state.time * 0.5) * 20 * (1 - state.pulseActive);
+        // BACKGROUND MATRIX PENDULUM: Attenuated down to a clean, smoky 0.08 opacity, line width 1
+        ctx.strokeStyle = 'rgba(69, 243, 255, 0.08)'; ctx.lineWidth = 1; let driftX = Math.sin(state.time * 0.5) * 20 * (1 - state.pulseActive);
         for (let i = -maxR; i < maxR * 1.5; i += 30) { ctx.beginPath(); ctx.moveTo(cx - maxR + driftX, cy + i); ctx.lineTo(cx + maxR + driftX, cy - i); ctx.stroke(); }
         
         let totalLoops = 24 + (freq * 6); 
