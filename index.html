@@ -491,7 +491,7 @@
         const rightCenterX = isPortrait ? w / 2 : w * 0.65; const rightCenterY = isPortrait ? h * 0.74 : h / 2;
         const viewRadius = isPortrait ? maxR * 0.45 : maxR * 0.65;
 
-        ctx.strokeStyle = 'rgba(69, 243, 255, 0.8)'; ctx.lineWidth = 1; ctx.setLineDash([5, 5]); ctx.beginPath(); 
+        ctx.strokeStyle = 'rgba(69, 243, 255, 0.5)'; ctx.lineWidth = 1; ctx.setLineDash([5, 5]); ctx.beginPath(); 
         if (isPortrait) { ctx.moveTo(0, h * 0.5); ctx.lineTo(w, h * 0.5); } else { ctx.moveTo(w * 0.5, 0); ctx.lineTo(w * 0.5, h); }
         ctx.stroke(); ctx.setLineDash([]);
 
@@ -500,7 +500,7 @@
         ctx.fillText("STANDARD GENERAL RELATIVITY", leftCenterX, leftCenterY - textOffset);
         ctx.fillText("SOLITON RESONANCE FRAMEWORK", rightCenterX, rightCenterY - textOffset);
 
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'; ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.09)'; ctx.lineWidth = 1;
         let classicalPulse = Math.sin(state.time * 0.5) * 2; 
         for (let i = -8; i <= 8; i++) {
             ctx.beginPath();
