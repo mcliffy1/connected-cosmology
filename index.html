@@ -192,7 +192,7 @@
 
 <div id="container">
     <div id="sidebar">
-        <h2>Soliton Universe v4.0</h2>
+        <h2>Soliton Universe v4.1</h2>
         
         <div class="control-group">
             <label>Scale Domain</label>
@@ -415,7 +415,6 @@
     }
 
     function drawMacroSoliton(cx, cy, maxR, nl, dens) {
-        // RADIAL BACKDROP LINES: Brightened contrast from 0.06 to 0.18 opacity
         ctx.strokeStyle = 'rgba(255, 140, 0, 0.18)'; ctx.lineWidth = 1.2;
         for (let r = 50; r < maxR * 1.5; r += 40) { ctx.beginPath(); ctx.arc(cx, cy, r + Math.sin(state.time + r*0.02)*5, 0, Math.PI * 2); ctx.stroke(); }
         
@@ -462,18 +461,23 @@
     }
 
     function drawBioObserver(cx, cy, maxR, nl, dens, freq) {
-        // BACKGROUND MATRIX PENDULUM: Fired up opacity from 0.03 to 0.12, width to 2
-        ctx.strokeStyle = 'rgba(69, 243, 255, 0.12)'; ctx.lineWidth = 2; let driftX = Math.sin(state.time * 0.5) * 20 * (1 - state.pulseActive);
+        // BACKGROUND MATRIX PENDULUM: Attenuated down to a clean, smoky 0.04 opacity, line width 1
+        ctx.strokeStyle = 'rgba(69, 243, 255, 0.04)'; ctx.lineWidth = 1; let driftX = Math.sin(state.time * 0.5) * 20 * (1 - state.pulseActive);
         for (let i = -maxR; i < maxR * 1.5; i += 30) { ctx.beginPath(); ctx.moveTo(cx - maxR + driftX, cy + i); ctx.lineTo(cx + maxR + driftX, cy - i); ctx.stroke(); }
         
-        let totalLoops = 24 + (freq * 6); ctx.lineWidth = 1.5; let noiseFactor = (5 - nl) * 8 * (1 - state.pulseActive) + (state.jitter * 2);
+        let totalLoops = 24 + (freq * 6); 
+        // TOROIDAL FIELD STRANDS: Finessed up to line width 2.0 for absolute focal contrast
+        ctx.lineWidth = 2.0; 
+        let noiseFactor = (5 - nl) * 8 * (1 - state.pulseActive) + (state.jitter * 2);
         for (let i = 0; i < totalLoops; i++) {
             let angle = (i * Math.PI * 2) / totalLoops + state.time * 0.2; ctx.beginPath();
             for (let t = -Math.PI; t <= Math.PI; t += 0.1) {
                 let r = (maxR * 0.4) * (1 + 0.3 * Math.sin(freq * t + state.time)); let noise = Math.sin(t * 12 + i) * noiseFactor;
                 let x = cx + Math.cos(angle) * (r + noise) * Math.cos(t); let y = cy + Math.sin(angle) * (r + noise) * Math.cos(t) + Math.sin(t) * (maxR * 0.2);
-                let alpha = Math.max(0, Math.min(1, (Math.cos(t) + 1) * 0.2 + 0.1)); 
-                ctx.strokeStyle = `rgba(255, 215, 0, ${alpha})`;
+                let alpha = Math.max(0, Math.min(1, (Math.cos(t) + 1) * 0.25 + 0.15)); 
+                
+                // Pure, saturated golden amber signature
+                ctx.strokeStyle = `rgba(255, 191, 0, ${alpha})`;
                 if (t === -Math.PI) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.stroke();
