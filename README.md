@@ -23,20 +23,27 @@ This framework is not built on abstract metaphors; it is anchored directly to br
 * **Core Paper:** *Experimental Observation of Negative Weak Values for the Time Atoms Spend in the Excited State as a Photon Is Transmitted* (Physical Review Letters 136, 153601, April 2026)
 * **Framework Mapping:** **Tesla Harmonic Node & Synchronicity Pulse**
 > **Critical Insight:** This landmark quantum optics experiment used weak measurement techniques to prove that a transmitted photon can spend a *negative* time ($−0.82 \pm 0.31 \, \tau_0$) as an atomic excitation. This provides direct empirical proof for our variable phase engine, confirming that negative phase values describe real, physical, non-local states when a system achieves phase-locking.
-
-### 3. Nonlinear Wave Mechanics & Soliton Self-Stabilization
+> 
+### 3. Cosmic Scale-Invariance & The Mass-Radius Phase Boundary
+* **Primary Scientists:** Dr. Charles H. Lineweaver & Vihan M. Patel *(Research School of Astronomy and Astrophysics, Australian National University)*
+* **Core Paper:** *All objects and some questions* (American Journal of Physics 91, 819-825, October 2023)
+* **Framework Mapping:** **The Complete Multi-Scale Matrix (v5.0 Engine Framework)**
+> **Critical Insight:** Lineweaver and Patel mapped the masses and sizes of every known structure in the universe on a single pedagogical plot. Their work highlights the geometric intersection where the General Relativity boundary ($m \propto r$) meets the Quantum Uncertainty boundary ($m \propto r^{-1}$). This intersection culminates at the minimum possible size limit: the Planck-mass black hole, or **"instanton."** Our model treats the instanton not as a point singularity, but as the fundamental, cross-scale fluid breather node (the master grounding coordinate of **Node 9**). Furthermore, their empirical plotting shows that the entire observable universe sits precisely on the black hole boundary line—validating our architecture's claim that cosmological expansion is a localized phase-gradient shift inside a massive, scale-invariant superfluid vortex.
+>
+> 
+### 4. Nonlinear Wave Mechanics & Soliton Self-Stabilization
 * **Primary Scientist:** Dr. Frank Merle *(Chair of Mathematical Analysis, Université de Cergy-Pontoise / IHES)*
 * **Core Papers:** Mathematical proofs on blow-up profiles and stable wave classifications for the Nonlinear Schrödinger Equation (NLS).
 * **Framework Mapping:** **Field Nonlinearity (The Merle Slider) & Black Hole Lab**
 > **Critical Insight:** Dr. Merle’s mathematical proofs define the exact non-linear threshold where a wave packet transitions from chaotic scattering into a self-confined, spatially stable bound state. In our macro-galactic model, this replaces the need for hypothetical particle "dark matter halos"—the flat rotation curves track the constant phase velocity of the soliton envelope.
 
-### 4. Hydrodynamic Wave Formulation (The "Cosmic River" Blueprint)
+### 5. Hydrodynamic Wave Formulation (The "Cosmic River" Blueprint)
 * **Primary Scientist:** Erwin Madelung *(Mathematical Physicist)*
 * **Historical Foundation:** *Quantentheorie in hydrodynamischer Form* (Z. Phys., 1927)
 * **Framework Mapping:** **The Superfluid Spacetime Plenum Fluid**
 > **Critical Insight:** Madelung mathematically proved that the complex wave function can be rewritten completely as a compressible, physical fluid with local density ($\rho$) and a real velocity field ($v = \nabla S/\mu$). This acts as the baseline math for our model, treating the space-time vacuum as a flowing fluid substrate shaped by internal pressure gradients.
 
-### 5. Toroidal Resonance & Coupled Biological Oscillations
+### 6. Toroidal Resonance & Coupled Biological Oscillations
 * **Primary Scientist:** Itzhak Bentov *(Biomedical Engineer / Inventor)*
 * **Historical Foundation:** *Stalking the Wild Pendulum: On the Mechanics of Consciousness* (1977) / Operationalized in the declassified 1983 CIA *Gateway Process Evaluation* Ledger.
 * **Framework Mapping:** **Bio-Observer Scale Mode**
