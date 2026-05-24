@@ -206,7 +206,7 @@
         state.effMass = sliderMass ? parseFloat(sliderMass.value) : 1.2;
         state.dispersionD = sliderDispersion ? parseInt(sliderDispersion.value) : 1;
 
-        if (valPhase) valPhase.innerText = `${state.phaseShift.toFixed(2)}&pi;`;
+        if (valPhase) valPhase.innerText = `${state.phaseShift.toFixed(2)}\u03C0`;
         if (valLambda) valLambda.innerText = state.lambdaStrength;
         if (valMass) valMass.innerText = state.effMass.toFixed(2);
         if (valDispersion) valDispersion.innerText = state.dispersionD;
@@ -562,7 +562,7 @@
         let pulseRadius = maxR * (1 - state.pulseActive) * 1.6;
         let pulseAlpha = Math.max(0, Math.min(1, state.pulseActive));
         ctx.strokeStyle = `rgba(102, 252, 241, ${pulseAlpha})`; ctx.setLineDash([]); ctx.lineWidth = 3 * state.pulseActive;
-        ctx.beginPath(); ctx.arc(cx, cy, pulseRadius, 0, Math.PI * 2); stroke();
+        ctx.beginPath(); ctx.arc(cx, cy, pulseRadius, 0, Math.PI * 2); ctx.stroke();
     }
 
     window.onload = function() {
