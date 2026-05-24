@@ -265,30 +265,12 @@
 </div>
 
 <script>
-    const canvas = document.getElementById('universeCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    const btnMacro = document.getElementById('btn-macro');
-    const btnMicro = document.getElementById('btn-micro');
-    const btnBio = document.getElementById('btn-bio');
-    const btnBlackHole = document.getElementById('btn-blackhole');
-    
-    const sliderPhase = document.getElementById('slider-phase');
-    const sliderFilaments = document.getElementById('slider-filaments');
-    const sliderDensity = document.getElementById('slider-density');
-    const sliderFreq = document.getElementById('slider-freq');
-    const btnPulse = document.getElementById('btn-pulse');
-    const rtiFill = document.getElementById('rti-fill');
-    
-    const hudTitle = document.getElementById('hud-title');
-    const hudText = document.getElementById('hud-text');
-    const mobHudTitle = document.getElementById('mob-hud-title');
-    const mobHudText = document.getElementById('mob-hud-text');
-
-    const valPhase = document.getElementById('val-phase');
-    const valFilaments = document.getElementById('val-filaments');
-    const valDensity = document.getElementById('val-density');
-    const valFreq = document.getElementById('val-freq');
+    // Variable holders defined globally for reference across drawing functions
+    let canvas, ctx;
+    let btnMacro, btnMicro, btnBio, btnBlackHole;
+    let sliderPhase, sliderFilaments, sliderDensity, sliderFreq, btnPulse, rtiFill;
+    let hudTitle, hudText, mobHudTitle, mobHudText;
+    let valPhase, valFilaments, valDensity, valFreq;
 
     const modeConfig = {
         macro: {
@@ -355,24 +337,10 @@
                 buttons[i].classList.remove('active');
             }
         }
-        // Protected check to prevent crash during unassigned programmatic calls
         if (activeBtn) {
             activeBtn.classList.add('active');
         }
         updateStateValues();
-    }
-
-    if (btnMacro) {
-        btnMacro.addEventListener('click', function() { setMode('macro', btnMacro); });
-    }
-    if (btnMicro) {
-        btnMicro.addEventListener('click', function() { setMode('micro', btnMicro); });
-    }
-    if (btnBio) {
-        btnBio.addEventListener('click', function() { setMode('bio', btnBio); });
-    }
-    if (btnBlackHole) {
-        btnBlackHole.addEventListener('click', function() { setMode('blackhole', btnBlackHole); });
     }
 
     function updateStateValues() {
@@ -452,50 +420,353 @@
         }
     }
 
-    const sliders = [sliderPhase, sliderFilaments, sliderDensity, sliderFreq];
-    for (let i = 0; i < sliders.length; i++) {
-        if (sliders[i]) {
-            sliders[i].addEventListener('input', updateStateValues);
-        }
-    }
-
-    if (btnPulse) {
-        btnPulse.addEventListener('click', function() {
-            state.pulseActive = 1.0; 
-        });
-    }
-
     function animate(timestamp) {
         if (!lastTime) lastTime = timestamp;
         const dt = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const maxRadius = Math.min(canvas.width, canvas.height) * 0.45;
-        
-        if (state.pulseActive > 0) {
-            state.pulseActive -= 0.84 * dt; 
-            if(state.pulseActive < 0) state.pulseActive = 0;
-            updateStateValues();
+        if (ctx && canvas) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const maxRadius = Math.min(canvas.width, canvas.height) * 0.45;
+            
+            if (state.pulseActive > 0) {
+                state.pulseActive -= 0.84 * dt; 
+                if(state.pulseActive < 0) state.pulseActive = 0;
+                updateStateValues();
+            }
+
+            state.time += 1.5 * dt * (1 - state.pulseActive * 0.4) * state.velocityScale; 
+
+            let currentCenterX = centerX + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
+            let currentCenterY = centerY + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
+
+            if (state.pulseActive > 0.05 && state.mode !== 'blackhole') {
+                drawChaosPlenum(centerX, centerY, maxRadius);
+            }
+
+            if (state.mode === 'macro') {
+                drawMacroSoliton(currentCenterX, currentCenterY, maxRadius, state.filamentsNum, state.fluidDensity);
+            } else if (state.mode === 'micro') {
+                drawMicroAtom(centerX, centerY, maxRadius, state.freqIndex, state.fluidDensity);
+            } else if (state.mode === 'bio') {
+                drawBioObserver(currentCenterX, currentCenterY, maxRadius, state.fluidDensity, state.freqIndex);
+            } else {
+                drawBlackHoleLab(maxRadius);
+            }
+
+            if (state.pulseActive > 0 && state.mode !== 'blackhole') {
+                drawSynchronicityPulse(centerX, centerY, maxRadius);
+            }
         }
 
-        state.time += 1.5 * dt * (1 - state.pulseActive * 0.4) * state.velocityScale; 
+        requestAnimationFrame(animate);
+    }
 
-        let currentCenterX = centerX + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
-        let currentCenterY = centerY + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
+    function drawChaosPlenum(cx, cy, maxR) {
+        ctx.fillStyle = "rgba(69, 243, 255, " + (state.pulseActive * 0.15) + ")";
+        for (let i = 0; i < state.chaosField.length; i++) {
+            let p = state.chaosField[i];
+            p.phase += p.speed;
+            let offsetR = maxR * 0.8 * Math.sin(p.phase);
+            let px = cx + p.x * offsetR;
+            let py = cy + p.y * offsetR;
+            ctx.beginPath();
+            ctx.arc(px, py, 1.5 + state.pulseActive * 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
 
-        if (state.pulseActive > 0.05 && state.mode !== 'blackhole') {
-            drawChaosPlenum(centerX, centerY, maxRadius);
+    function drawMacroSoliton(cx, cy, maxR, filaments, dens) {
+        ctx.strokeStyle = 'rgba(255, 140, 0, 0.12)'; ctx.lineWidth = 1.0;
+        for (let r = 50; r < maxR * 1.5; r += 40) { 
+            ctx.beginPath(); 
+            ctx.arc(cx, cy, r + Math.sin(state.time * state.phaseDirection + r*0.02)*5, 0, Math.PI * 2); 
+            ctx.stroke(); 
+        }
+        
+        let numArms = 3; 
+        ctx.lineWidth = 1.5;
+        for (let a = 0; a < numArms; a++) {
+            let armAngle = (a * Math.PI * 2) / numArms + (state.time * 0.08 * state.phaseDirection); 
+            ctx.beginPath();
+            
+            let stepSize = Math.max(2, Math.floor(150 / filaments));
+            for (let r = maxR; r > 5; r -= stepSize) {
+                let waveMod = state.jitter * 0.005 * Math.sin(r * 0.1 - state.time * 4 * state.phaseDirection);
+                let theta = armAngle + (maxR - r) * (0.0004 * filaments * dens) + waveMod;
+                let x = cx + Math.cos(theta) * r; 
+                let y = cy + Math.sin(theta) * r;
+                let alpha = Math.max(0, Math.min(1, (1 - r / maxR) * 0.6)); 
+                
+                if (state.isInPhase || state.isAntiPhase) {
+                    ctx.strokeStyle = "rgba(69, 243, 255, " + (alpha * 1.6) + ")";
+                } else {
+                    ctx.strokeStyle = "rgba(69, 243, 255, " + alpha + ")";
+                }
+                
+                if (r === maxR) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+
+                if (r % 20 === 0 && alpha > 0.15) {
+                    if (state.isAntiPhase) {
+                        ctx.fillStyle = "rgba(245, 66, 164, " + (alpha * 1.5) + ")";
+                    } else {
+                        ctx.fillStyle = "rgba(69, 243, 255, " + (alpha * 1.5) + ")";
+                    }
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2.5 + (state.pulseActive * 3), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            ctx.stroke();
         }
 
-        if (state.mode === 'macro') {
-            drawMacroSoliton(currentCenterX, currentCenterY, maxRadius, state.filamentsNum, state.fluidDensity);
-        } else if (state.mode === 'micro') {
-            drawMicroAtom(centerX, centerY, maxRadius, state.freqIndex, state.fluidDensity);
-        } else if (state.mode === 'bio') {
-            drawBioObserver(currentCenterX, currentCenterY, maxRadius, state.fluidDensity, state.freqIndex);
-        } else {
-            drawBlackHoleLab(maxRadius);
+        let gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 0.4);
+        let gradAlpha = Math.max(0, Math.min(1, 0.7 * (filaments/50)));
+        if (state.isInPhase) gradAlpha = 1.0; 
+        
+        gradient.addColorStop(0, "rgba(69, 243, 255, " + (gradAlpha || 0.7) + ")"); 
+        gradient.addColorStop(0.3, "rgba(102, 252, 241, 0.35)"); 
+        gradient.addColorStop(1, 'rgba(11, 12, 16, 0)');
+        ctx.fillStyle = gradient; ctx.beginPath(); ctx.arc(cx, cy, maxR * 0.4, 0, Math.PI * 2); ctx.fill();
+
+        let axisY = cy + maxR * 0.75; 
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx - maxR, axisY); ctx.lineTo(cx + maxR, axisY); ctx.stroke();
+        ctx.strokeStyle = '#66fcf1'; ctx.lineWidth = 2; ctx.beginPath();
+        for (let px = -maxR; px <= maxR; px += 5) {
+            let r = Math.abs(px); if (r < 10) continue;
+            
+            let normalizedR = r / maxR;
+            let v = (1 - Math.exp(-normalizedR * 8.0)) * (maxR * 0.22) * (1 + (filaments - 50) * 0.002); 
+            
+            let py = axisY - v;
+            if (px === -maxR) {
+                ctx.moveTo(cx + px, py);
+            } else {
+                ctx.lineTo(cx + px, py);
+            }
+        }
+        ctx.stroke(); 
+        ctx.fillStyle = 'rgba(102, 252, 241, 0.7)'; ctx.font = '10px Segoe UI'; 
+        ctx.fillText("PHASE ENVELOPE VELOCITY: RATIO MODULATION EQUIVALENT TO n^1.014 NODAL LATTICE", cx - maxR, axisY + 14);
+    }
+
+    function drawMicroAtom(cx, cy, maxR, n, dens) {
+        let totalRays = 180; ctx.lineWidth = 2;
+        
+        for (let i = 0; i < totalRays; i++) {
+            let angle = (i * Math.PI * 2) / totalRays; 
+            let radialPressure = Math.sin(n * state.time * 1.4 * state.phaseDirection) * Math.cos(n * angle * 2); 
+            let nodeRadius = maxR * 0.52 + radialPressure * (22 * dens);
+            let startX = cx + Math.cos(angle) * (nodeRadius * 0.15); 
+            let startY = cy + Math.sin(angle) * (nodeRadius * 0.15); 
+            let endX = cx + Math.cos(angle) * nodeRadius; 
+            let endY = cy + Math.sin(angle) * nodeRadius;
+            
+            let hue = 180 + (n * 35); 
+            if (state.isAntiPhase) hue = 310; 
+            
+            let intensity = Math.max(0, Math.min(1, Math.abs(radialPressure) * 0.4));
+            if (state.isInPhase || state.isAntiPhase) intensity *= 1.6; 
+            
+            ctx.strokeStyle = "hsla(" + hue + ", 100%, 72%, " + intensity + ")";
+            ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
+        }
+        for (let level = 1; level <= n; level++) {
+            let shellR = maxR * (level / (n + 0.4)); 
+            let shellAlpha = Math.max(0, Math.min(1, 0.16 / level));
+            ctx.strokeStyle = "rgba(69, 243, 255, " + shellAlpha + ")"; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.arc(cx, cy, shellR, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+        }
+        ctx.fillStyle = '#ffffff'; if (state.isInPhase) { ctx.shadowBlur = 35; } else { ctx.shadowBlur = 15; } ctx.shadowColor = '#45f3ff'; ctx.beginPath(); ctx.arc(cx, cy, 4.5, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    }
+
+    function drawBioObserver(cx, cy, maxR, dens, freq) {
+        ctx.strokeStyle = 'rgba(69, 243, 255, 0.06)'; ctx.lineWidth = 1; 
+        let driftX = Math.sin(state.time * 0.4 * state.phaseDirection) * 25 * (1 - state.pulseActive);
+        for (let i = -maxR; i < maxR * 1.5; i += 30) { 
+            ctx.beginPath(); ctx.moveTo(cx - maxR + driftX, cy + i); ctx.lineTo(cx + maxR + driftX, cy - i); ctx.stroke(); 
+        }
+        
+        let totalLoops = 24 + (freq * 8); 
+        ctx.lineWidth = 1.8; 
+        let noiseFactor = 12 * (1 - state.pulseActive) + (state.jitter * 2.2);
+        
+        for (let i = 0; i < totalLoops; i++) {
+            let angle = (i * Math.PI * 2) / totalLoops + (state.time * 0.18 * state.phaseDirection); 
+            ctx.beginPath();
+            for (let t = -Math.PI; t <= Math.PI; t += 0.1) {
+                let r = (maxR * 0.42) * (1 + 0.28 * Math.sin(freq * t + state.time * state.phaseDirection)); 
+                let noise = Math.sin(t * 10 + i) * noiseFactor;
+                let x = cx + Math.cos(angle) * (r + noise) * Math.cos(t); 
+                let y = cy + Math.sin(angle) * (r + noise) * Math.cos(t) + Math.sin(t) * (maxR * 0.22);
+                let alpha = Math.max(0, Math.min(1, (Math.cos(t) + 1) * 0.22 + 0.15)); 
+                if (state.isInPhase) alpha *= 1.5; 
+                
+                ctx.strokeStyle = "rgba(255, 185, 0, " + alpha + ")";
+                if (t === -Math.PI) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+        }
+        let pulseGlow = Math.max(0, Math.min(50, 12 + state.pulseActive * 30)); 
+        ctx.fillStyle = '#ffffff'; ctx.shadowBlur = pulseGlow; ctx.shadowColor = '#66fcf1'; ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    }
+
+    function drawBlackHoleLab(maxR) {
+        const w = canvas.width; const h = canvas.height; const isPortrait = h > w;
+        const leftCenterX = isPortrait ? w / 2 : w * 0.33; const leftCenterY = isPortrait ? h * 0.25 : h / 2;
+        const rightCenterX = isPortrait ? w / 2 : w * 0.67; const rightCenterY = isPortrait ? h * 0.75 : h / 2;
+        const viewRadius = isPortrait ? maxR * 0.42 : maxR * 0.62;
+
+        ctx.strokeStyle = 'rgba(69, 243, 255, 0.18)'; ctx.lineWidth = 1; ctx.setLineDash([5, 5]); ctx.beginPath(); 
+        if (isPortrait) { ctx.moveTo(0, h * 0.5); ctx.lineTo(w, h * 0.5); } else { ctx.moveTo(w * 0.5, 0); ctx.lineTo(w * 0.5, h); }
+        ctx.stroke(); ctx.setLineDash([]);
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)'; ctx.font = 'bold 11px Segoe UI'; ctx.textAlign = 'center';
+        let textOffset = isPortrait ? viewRadius + 14 : viewRadius + 18;
+        ctx.fillText("STANDARD GENERAL RELATIVITY", leftCenterX, leftCenterY - textOffset);
+        ctx.fillText("SOLITON SUPERFLUID VORTEX CORE", rightCenterX, rightCenterY - textOffset);
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)'; ctx.lineWidth = 1.2; 
+        let classicalPulse = Math.sin(state.time * 0.5) * 2; 
+        
+        const epsilonSq = 100; 
+
+        for (let i = -8; i <= 8; i++) {
+            ctx.beginPath();
+            for (let r = viewRadius; r > 15; r -= 5) {
+                let warp = (Math.pow(28, 2) / (r * r + epsilonSq)) * (18 + classicalPulse); 
+                let angle = (i * Math.PI) / 8;
+                let x = leftCenterX + Math.cos(angle) * r; let y = leftCenterY + Math.sin(angle) * r + warp;
+                if (r === viewRadius) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+        }
+        ctx.fillStyle = '#000000'; ctx.strokeStyle = 'rgba(255, 0, 100, 0.5)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(leftCenterX, leftCenterY, 20, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        
+        ctx.fillStyle = '#ffff00'; 
+        ctx.beginPath(); ctx.arc(leftCenterX, leftCenterY, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.font = '9px Segoe UI'; ctx.fillText("SINGULARITY TEAR", leftCenterX, leftCenterY + 4);
+
+        ctx.strokeStyle = 'rgba(102, 252, 241, 0.14)'; ctx.lineWidth = 1.5;
+        let arms = 6;
+        for (let i = 0; i < arms; i++) {
+            let baseAngle = (i * Math.PI * 2) / arms + (state.time * 0.35 * state.phaseDirection); ctx.beginPath();
+            for (let r = viewRadius; r > 20; r -= 3) {
+                let tJitter = state.jitter * 0.01 * Math.sin(r * 0.2 - state.time * 4 * state.phaseDirection);
+                let theta = baseAngle + (viewRadius - r) * (0.015 * state.fluidDensity) + tJitter;
+                let x = rightCenterX + Math.cos(theta) * r; let y = rightCenterY + Math.sin(theta) * r;
+                if (r === viewRadius) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+        }
+
+        let leakAlpha = Math.max(0, Math.min(1, 0.22 * Math.sin(state.time * 1.8)));
+        ctx.strokeStyle = "rgba(255, 140, 0, " + leakAlpha + ")"; ctx.lineWidth = 1.0;
+        for (let r = 25; r < viewRadius; r += 20) {
+            ctx.beginPath(); ctx.arc(rightCenterX, rightCenterY, r + (state.time * 10 * state.phaseDirection) % 20, 0, Math.PI * 2); ctx.stroke();
+        }
+
+        ctx.beginPath(); 
+        let coreGlow = ctx.createRadialGradient(rightCenterX, rightCenterY, 0, rightCenterX, rightCenterY, 24);
+        coreGlow.addColorStop(0, '#ffffff'); 
+        let rightAlpha = Math.max(0, Math.min(1, 0.85 * (state.filamentsNum / 50)));
+        if (state.isInPhase) rightAlpha = 1.0; 
+        
+        coreGlow.addColorStop(0.3, "rgba(69, 243, 255, " + (rightAlpha || 0.8) + ")"); coreGlow.addColorStop(1, 'rgba(11, 12, 16, 0)');
+        ctx.fillStyle = coreGlow; ctx.arc(rightCenterX, rightCenterY, 24, 0, Math.PI * 2); ctx.fill(); 
+        
+        ctx.fillStyle = '#66fcf1'; ctx.font = '9px Segoe UI'; ctx.fillText("SELF-LIMITING CORE", rightCenterX, rightCenterY + 4);
+        ctx.textAlign = 'left';
+    }
+
+    function drawSynchronicityPulse(cx, cy, maxR) {
+        let pulseRadius = maxR * (1 - state.pulseActive) * 1.6;
+        let pulseAlpha = Math.max(0, Math.min(1, state.pulseActive));
+        ctx.strokeStyle = "rgba(102, 252, 241, " + pulseAlpha + ")"; ctx.setLineDash([]); ctx.lineWidth = 3 * state.pulseActive;
+        ctx.beginPath(); ctx.arc(cx, cy, pulseRadius, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    // Lifecycle hook encapsulates target definitions until DOM compilation is finished
+    window.onload = function() {
+        canvas = document.getElementById('universeCanvas');
+        if (canvas) {
+            ctx = canvas.getContext('2d');
+        }
+        
+        btnMacro = document.getElementById('btn-macro');
+        btnMicro = document.getElementById('btn-micro');
+        btnBio = document.getElementById('btn-bio');
+        btnBlackHole = document.getElementById('btn-blackhole');
+        
+        sliderPhase = document.getElementById('slider-phase');
+        sliderFilaments = document.getElementById('slider-filaments');
+        sliderDensity = document.getElementById('slider-density');
+        sliderFreq = document.getElementById('slider-freq');
+        btnPulse = document.getElementById('btn-pulse');
+        rtiFill = document.getElementById('rti-fill');
+        
+        hudTitle = document.getElementById('hud-title');
+        hudText = document.getElementById('hud-text');
+        mobHudTitle = document.getElementById('mob-hud-title');
+        mobHudText = document.getElementById('mob-hud-text');
+
+        valPhase = document.getElementById('val-phase');
+        valFilaments = document.getElementById('val-filaments');
+        valDensity = document.getElementById('val-density');
+        valFreq = document.getElementById('val-freq');
+
+        // Bind interactive event listeners securely post-compilation
+        if (btnMacro) {
+            btnMacro.addEventListener('click', function() { setMode('macro', btnMacro); });
+        }
+        if (btnMicro) {
+            btnMicro.addEventListener('click', function() { setMode('micro', btnMicro); });
+        }
+        if (btnBio) {
+            btnBio.addEventListener('click', function() { setMode('bio', btnBio); });
+        }
+        if (btnBlackHole) {
+            btnBlackHole.addEventListener('click', function() { setMode('blackhole', btnBlackHole); });
+        }
+
+        const sliders = [sliderPhase, sliderFilaments, sliderDensity, sliderFreq];
+        for (let i = 0; i < sliders.length; i++) {
+            if (sliders[i]) {
+                sliders[i].addEventListener('input', updateStateValues);
+            }
+        }
+
+        if (btnPulse) {
+            btnPulse.addEventListener('click', function() {
+                state.pulseActive = 1.0; 
+            });
+        }
+
+        resize();
+        initChaos();
+        setMode('macro', btnMacro);
+        requestAnimationFrame(animate);
+    };
+</script>
+
+</body>
+</html>
