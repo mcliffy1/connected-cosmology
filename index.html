@@ -271,6 +271,13 @@
         let x0 = 50; 
         let smoothCoherence = 5 + (95 / (1 + Math.exp(-k * (rawCoherence - x0))));
 
+        // Additional drop in coherence if the soliton is compressed by bounds
+        let massScale = Math.max(0.1, state.effMass * 0.4);
+        if (state.showForbidden && massScale < 0.4) {
+             smoothCoherence -= (0.4 - massScale) * 150; 
+             if (smoothCoherence < 5) smoothCoherence = 5;
+        }
+
         if (state.pulseActive > 0) {
             smoothCoherence = smoothCoherence + (100 - smoothCoherence) * state.pulseActive;
         }
@@ -301,16 +308,20 @@
             let currentCenterX = centerX + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
             let currentCenterY = centerY + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
 
+            let massScale = Math.max(0.1, state.effMass * 0.4);
+            let upperBound = centerY - (maxRadius / massScale);
+            let lowerBound = centerY + (maxRadius * massScale);
+
             if (state.pulseActive > 0.05 && state.mode !== 'blackhole') {
                 drawChaosPlenum(centerX, centerY, maxRadius);
             }
 
             if (state.showForbidden) {
-                drawForbiddenRegions(centerX, centerY, maxRadius);
+                drawForbiddenRegions(centerX, centerY, maxRadius, upperBound, lowerBound);
             }
 
             if (state.mode === 'macro') {
-                drawMacroSoliton(currentCenterX, currentCenterY, maxRadius, state.lambdaStrength, state.effMass);
+                drawMacroSoliton(currentCenterX, currentCenterY, maxRadius, state.lambdaStrength, state.effMass, upperBound, lowerBound);
             } else if (state.mode === 'micro') {
                 drawMicroAtom(centerX, centerY, maxRadius, state.dispersionD, state.effMass);
             } else if (state.mode === 'bio') {
@@ -340,30 +351,29 @@
         });
     }
 
-    function drawForbiddenRegions(cx, cy, maxR) {
+    function drawForbiddenRegions(cx, cy, maxR, upperBound, lowerBound) {
         if (!state.showForbidden) return;
         
-        let massScale = Math.max(0.1, state.effMass * 0.4);
         ctx.strokeStyle = 'rgba(255, 69, 69, 0.4)'; 
         ctx.lineWidth = 2;
         
         ctx.beginPath(); 
-        ctx.moveTo(cx - maxR, cy + (maxR * massScale)); 
-        ctx.lineTo(cx + maxR, cy - (maxR * massScale)); 
+        ctx.moveTo(cx - maxR, lowerBound); 
+        ctx.lineTo(cx + maxR, lowerBound); 
         ctx.stroke();
         
         ctx.beginPath(); 
-        ctx.moveTo(cx - maxR, cy - (maxR / massScale)); 
-        ctx.lineTo(cx + maxR, cy + (maxR / massScale)); 
+        ctx.moveTo(cx - maxR, upperBound); 
+        ctx.lineTo(cx + maxR, upperBound); 
         ctx.stroke();
         
         ctx.fillStyle = 'rgba(255, 69, 69, 0.8)'; 
         ctx.font = '10px Courier New';
-        ctx.fillText("FORBIDDEN (QM BOUND)", cx - maxR, cy - (maxR / massScale) - 10); 
-        ctx.fillText("FORBIDDEN (GR BOUND)", cx - maxR, cy + (maxR * massScale) + 15);
+        ctx.fillText("FORBIDDEN (QM BOUND)", cx - maxR, upperBound - 10); 
+        ctx.fillText("FORBIDDEN (GR BOUND)", cx - maxR, lowerBound + 15);
     }
 
-    function drawMacroSoliton(cx, cy, maxR, lambda, mass) {
+    function drawMacroSoliton(cx, cy, maxR, lambda, mass, upperBound, lowerBound) {
         ctx.strokeStyle = 'rgba(255, 140, 0, 0.12)'; ctx.lineWidth = 1.0;
         for (let r = 50; r < maxR * 1.5; r += 40) { 
             ctx.beginPath(); 
@@ -385,12 +395,31 @@
                 let y = cy + Math.sin(theta) * r;
                 let alpha = Math.max(0, Math.min(1, (1 - r / maxR) * 0.6)); 
                 
-                ctx.strokeStyle = (state.isInPhase || state.isAntiPhase) ? 
-                    `rgba(69, 243, 255, ${alpha * 1.6})` : `rgba(69, 243, 255, ${alpha})`;
+                let hitBound = false;
+
+                if (state.showForbidden) {
+                    if (y > lowerBound) { y = lowerBound; hitBound = true; }
+                    if (y < upperBound) { y = upperBound; hitBound = true; }
+                }
+
+                if (hitBound) {
+                    // Shear along the boundary (phase noise)
+                    x += (Math.random() - 0.5) * 12;
+                    ctx.strokeStyle = `rgba(255, 69, 69, ${alpha * 2.5})`; // Flash angry red
+                } else {
+                    ctx.strokeStyle = (state.isInPhase || state.isAntiPhase) ? 
+                        `rgba(69, 243, 255, ${alpha * 1.6})` : `rgba(69, 243, 255, ${alpha})`;
+                }
                 
                 if (r === maxR) ctx.moveTo(x, y); else ctx.lineTo(x, y);
 
-                if (r % 20 === 0 && alpha > 0.15) {
+                // Add collision sparks / thermal radiation when crushed
+                if (hitBound && Math.random() > 0.4) {
+                    ctx.fillStyle = 'rgba(255, 140, 0, 0.9)';
+                    ctx.beginPath();
+                    ctx.arc(x, y + (Math.random() - 0.5) * 6, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (r % 20 === 0 && alpha > 0.15) {
                     ctx.fillStyle = state.isAntiPhase ? 
                         `rgba(245, 66, 164, ${alpha * 1.5})` : `rgba(69, 243, 255, ${alpha * 1.5})`;
                     ctx.beginPath();
@@ -421,6 +450,12 @@
             let v = (1 - Math.exp(-normalizedR * 8.0)) * (maxR * 0.22) * (1 + (lambda - 50) * 0.002); 
             
             let py = axisY - v;
+            
+            if (state.showForbidden) {
+                if (py > lowerBound) py = lowerBound + (Math.random() - 0.5) * 6; // Add static noise when graph crushes
+                if (py < upperBound) py = upperBound - (Math.random() - 0.5) * 6;
+            }
+
             if (px === -maxR) ctx.moveTo(cx + px, py); else ctx.lineTo(cx + px, py);
         }
         ctx.stroke(); 
