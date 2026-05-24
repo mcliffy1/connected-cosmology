@@ -301,8 +301,13 @@
         jitter: 0,
         phaseDirection: 1,  
         velocityScale: 1.0, 
-        chaosField: []       
+        chaosField: [],
+        distTo3: 0,
+        distTo6: 0,
+        distTo9: 0
     };
+
+    let lastTime = 0; // Delta time integration tracker
 
     function initChaos() {
         state.chaosField = [];
@@ -353,20 +358,27 @@
         if (valDensity) valDensity.innerText = state.fluidDensity.toFixed(2);
         if (valFreq) valFreq.innerText = state.freqIndex;
 
-        let distTo3 = Math.abs(state.teslaNode - 3.0);
-        let distTo6 = Math.abs(state.teslaNode - 6.0);
-        let distTo9 = Math.abs(state.teslaNode - 9.0);
-        let minTeslaDist = Math.min(distTo3, distTo6, distTo9);
+        // Mathematical Modulo Fix for 3-6-9 Alignments
+        let nearestNode = Math.round(state.teslaNode / 3) * 3;
+        if (nearestNode < 3) nearestNode = 3;
+        if (nearestNode > 9) nearestNode = 9;
+        
+        let minTeslaDist = Math.abs(state.teslaNode - nearestNode);
+        
+        // Export specific distances for visual renderers
+        state.distTo3 = Math.abs(state.teslaNode - 3.0);
+        state.distTo6 = Math.abs(state.teslaNode - 6.0);
+        state.distTo9 = Math.abs(state.teslaNode - 9.0);
 
         state.jitter = minTeslaDist > 0.4 ? (minTeslaDist * 4.5) : 0;
 
-        if (distTo3 < 0.4) {
+        if (state.distTo3 < 0.4) {
             state.phaseDirection = 1;     
             state.velocityScale = 1.6;     
-        } else if (distTo6 < 0.4) {
+        } else if (state.distTo6 < 0.4) {
             state.phaseDirection = -1;    
             state.velocityScale = 1.6;
-        } else if (distTo9 < 0.4) {
+        } else if (state.distTo9 < 0.4) {
             state.phaseDirection = 1;     
             state.velocityScale = 0.3;     
         } else {
@@ -389,14 +401,18 @@
             baseStability = 50 + (state.fluidDensity * 15);
         }
 
-        let coherence = baseStability * (1 - (minTeslaDist / 6.0));
-        coherence = Math.max(5, Math.min(100, coherence));
+        // Mathematical Fix for Sigmoid Coherence Stability 
+        let rawCoherence = baseStability * (1 - (minTeslaDist / 6.0));
+        let k = 0.1; // Steepness
+        let x0 = 50; // Midpoint
+        let smoothCoherence = 5 + (95 / (1 + Math.exp(-k * (rawCoherence - x0))));
 
         if (state.pulseActive > 0) {
-            coherence = coherence + (100 - coherence) * state.pulseActive;
+            smoothCoherence = smoothCoherence + (100 - smoothCoherence) * state.pulseActive;
         }
+        
         if (rtiFill) {
-            rtiFill.style.width = `${coherence.toFixed(0)}%`;
+            rtiFill.style.width = `${smoothCoherence.toFixed(0)}%`;
         }
     }
 
@@ -410,7 +426,12 @@
         });
     }
 
-    function animate() {
+    function animate(timestamp) {
+        // Delta Time Integration
+        if (!lastTime) lastTime = timestamp;
+        const dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         const centerX = canvas.width / 2;
@@ -418,11 +439,13 @@
         const maxRadius = Math.min(canvas.width, canvas.height) * 0.45;
         
         if (state.pulseActive > 0) {
-            state.pulseActive -= 0.014; 
+            state.pulseActive -= 0.84 * dt; // Scaled to ~60fps equivalent timing
+            if(state.pulseActive < 0) state.pulseActive = 0;
             updateStateValues();
         }
 
-        state.time += 0.025 * (1 - state.pulseActive * 0.4) * state.velocityScale; 
+        // Time updates uniformly across frame rates
+        state.time += 1.5 * dt * (1 - state.pulseActive * 0.4) * state.velocityScale; 
 
         let currentCenterX = centerX + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
         let currentCenterY = centerY + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
@@ -470,10 +493,6 @@
         }
         
         let numArms = 3; 
-        let distTo3 = Math.abs(state.teslaNode - 3.0);
-        let distTo6 = Math.abs(state.teslaNode - 6.0);
-        let distTo9 = Math.abs(state.teslaNode - 9.0);
-        
         ctx.lineWidth = 1.5;
         for (let a = 0; a < numArms; a++) {
             let armAngle = (a * Math.PI * 2) / numArms + (state.time * 0.08 * state.phaseDirection); 
@@ -487,7 +506,7 @@
                 let y = cy + Math.sin(theta) * r;
                 let alpha = Math.max(0, Math.min(1, (1 - r / maxR) * 0.6)); 
                 
-                if (distTo3 < 0.4 || distTo6 < 0.4) {
+                if (state.distTo3 < 0.4 || state.distTo6 < 0.4) {
                     ctx.strokeStyle = `rgba(69, 243, 255, ${alpha * 1.6})`;
                 } else {
                     ctx.strokeStyle = `rgba(69, 243, 255, ${alpha})`;
@@ -496,7 +515,7 @@
                 if (r === maxR) ctx.moveTo(x, y); else ctx.lineTo(x, y);
 
                 if (r % 20 === 0 && alpha > 0.15) {
-                    ctx.fillStyle = distTo9 < 0.4 ? `rgba(102, 252, 241, ${alpha * 1.8})` : `rgba(255, 140, 0, ${alpha * 1.2})`;
+                    ctx.fillStyle = state.distTo9 < 0.4 ? `rgba(102, 252, 241, ${alpha * 1.8})` : `rgba(255, 140, 0, ${alpha * 1.2})`;
                     ctx.beginPath();
                     ctx.arc(x, y, 2.5 + (state.pulseActive * 3), 0, Math.PI * 2);
                     ctx.fill();
@@ -507,7 +526,7 @@
 
         let gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 0.4);
         let gradAlpha = Math.max(0, Math.min(1, 0.7 * (filaments/50)));
-        if (distTo9 < 0.4) gradAlpha = 1.0; 
+        if (state.distTo9 < 0.4) gradAlpha = 1.0; 
         
         gradient.addColorStop(0, `rgba(69, 243, 255, ${gradAlpha || 0.7})`); 
         gradient.addColorStop(0.3, `rgba(102, 252, 241, 0.35)`); 
@@ -519,7 +538,11 @@
         ctx.strokeStyle = '#66fcf1'; ctx.lineWidth = 2; ctx.beginPath();
         for (let px = -maxR; px <= maxR; px += 5) {
             let r = Math.abs(px); if (r < 10) continue;
-            let v = (1 - Math.exp(-r * 0.035)) * (maxR * 0.22) * (1 + (filaments - 50) * 0.002); 
+            
+            // Mathematical Fix for Normalization (Resolution Curve)
+            let normalizedR = r / maxR;
+            let v = (1 - Math.exp(-normalizedR * 8.0)) * (maxR * 0.22) * (1 + (filaments - 50) * 0.002); 
+            
             let py = axisY - v;
             if (px === -maxR) ctx.moveTo(cx + px, py); else ctx.lineTo(cx + px, py);
         }
@@ -530,9 +553,6 @@
 
     function drawMicroAtom(cx, cy, maxR, n, dens) {
         let totalRays = 180; ctx.lineWidth = 2;
-        let tDist3 = Math.abs(state.teslaNode - 3.0);
-        let tDist6 = Math.abs(state.teslaNode - 6.0);
-        let tDist9 = Math.abs(state.teslaNode - 9.0);
         
         for (let i = 0; i < totalRays; i++) {
             let angle = (i * Math.PI * 2) / totalRays; 
@@ -544,10 +564,10 @@
             let endY = cy + Math.sin(angle) * nodeRadius;
             
             let hue = 180 + (n * 35); 
-            if (tDist6 < 0.4) hue = 310; 
+            if (state.distTo6 < 0.4) hue = 310; 
             
             let intensity = Math.max(0, Math.min(1, Math.abs(radialPressure) * 0.4));
-            if (tDist3 < 0.4 || tDist6 < 0.4 || tDist9 < 0.4) intensity *= 1.6; 
+            if (state.distTo3 < 0.4 || state.distTo6 < 0.4 || state.distTo9 < 0.4) intensity *= 1.6; 
             
             ctx.strokeStyle = `hsla(${hue}, 100%, 72%, ${intensity})`;
             ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
@@ -557,7 +577,7 @@
             let shellAlpha = Math.max(0, Math.min(1, 0.16 / level));
             ctx.strokeStyle = `rgba(69, 243, 255, ${shellAlpha})`; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.arc(cx, cy, shellR, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
         }
-        ctx.fillStyle = '#ffffff'; ctx.shadowBlur = tDist9 < 0.4 ? 35 : 15; ctx.shadowColor = '#45f3ff'; ctx.beginPath(); ctx.arc(cx, cy, 4.5, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffffff'; ctx.shadowBlur = state.distTo9 < 0.4 ? 35 : 15; ctx.shadowColor = '#45f3ff'; ctx.beginPath(); ctx.arc(cx, cy, 4.5, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
     }
 
     function drawBioObserver(cx, cy, maxR, dens, freq) {
@@ -570,7 +590,6 @@
         let totalLoops = 24 + (freq * 8); 
         ctx.lineWidth = 1.8; 
         let noiseFactor = 12 * (1 - state.pulseActive) + (state.jitter * 2.2);
-        let tDist9 = Math.abs(state.teslaNode - 9.0);
         
         for (let i = 0; i < totalLoops; i++) {
             let angle = (i * Math.PI * 2) / totalLoops + (state.time * 0.18 * state.phaseDirection); 
@@ -581,7 +600,7 @@
                 let x = cx + Math.cos(angle) * (r + noise) * Math.cos(t); 
                 let y = cy + Math.sin(angle) * (r + noise) * Math.cos(t) + Math.sin(t) * (maxR * 0.22);
                 let alpha = Math.max(0, Math.min(1, (Math.cos(t) + 1) * 0.22 + 0.15)); 
-                if (tDist9 < 0.4) alpha *= 1.5; 
+                if (state.distTo9 < 0.4) alpha *= 1.5; 
                 
                 ctx.strokeStyle = `rgba(255, 185, 0, ${alpha})`;
                 if (t === -Math.PI) ctx.moveTo(x, y); else ctx.lineTo(x, y);
@@ -609,10 +628,15 @@
 
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)'; ctx.lineWidth = 1.2; 
         let classicalPulse = Math.sin(state.time * 0.5) * 2; 
+        
+        // Mathematical Fix: Asymptotic Softening 
+        const epsilonSq = 100; // Prevents singularities
+
         for (let i = -8; i <= 8; i++) {
             ctx.beginPath();
             for (let r = viewRadius; r > 15; r -= 5) {
-                let warp = Math.pow(28 / r, 2) * (18 + classicalPulse); let angle = (i * Math.PI) / 8;
+                let warp = (Math.pow(28, 2) / (r * r + epsilonSq)) * (18 + classicalPulse); 
+                let angle = (i * Math.PI) / 8;
                 let x = leftCenterX + Math.cos(angle) * r; let y = leftCenterY + Math.sin(angle) * r + warp;
                 if (r === viewRadius) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
@@ -648,7 +672,7 @@
         let coreGlow = ctx.createRadialGradient(rightCenterX, rightCenterY, 0, rightCenterX, rightCenterY, 24);
         coreGlow.addColorStop(0, '#ffffff'); 
         let rightAlpha = Math.max(0, Math.min(1, 0.85 * (state.filamentsNum / 50)));
-        if (Math.abs(state.teslaNode - 9.0) < 0.4) rightAlpha = 1.0; 
+        if (state.distTo9 < 0.4) rightAlpha = 1.0; 
         
         coreGlow.addColorStop(0.3, `rgba(69, 243, 255, ${rightAlpha || 0.8})`); coreGlow.addColorStop(1, 'rgba(11, 12, 16, 0)');
         ctx.fillStyle = coreGlow; ctx.arc(rightCenterX, rightCenterY, 24, 0, Math.PI * 2); ctx.fill(); 
@@ -668,7 +692,7 @@
         resize();
         initChaos();
         updateStateValues();
-        animate();
+        requestAnimationFrame(animate);
     };
 </script>
 
