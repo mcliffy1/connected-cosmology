@@ -226,4 +226,274 @@
 
         <div class="control-group">
             <label>Phase Coherence Spectrum (Nodal Density)</label>
-            <div id="rti-bar" style="height:6px; background:#0b0c10; border-radius:3px; position:
+            <div id="rti-bar" style="height:6px; background:#0b0c10; border-radius:3px; position:relative; overflow:hidden; border:1px solid #45f3ff;">
+                <div id="rti-fill" style="height:100%; width:80%; background:linear-gradient(90deg, #45f3ff, #66fcf1); transition:0.1s; box-shadow:0 0 8px #45f3ff;"></div>
+            </div>
+        </div>
+
+        <button id="btn-pulse" class="btn">Trigger Markov Spectral Collapse</button>
+
+        <div id="sidebar-hud">
+            <h3 id="mob-hud-title">Galactic Resonance Matrix</h3>
+            <p id="mob-hud-text" style="font-size: 0.8em; line-height: 1.4em; color: #c5c6c7; margin: 4px 0 0 0;"></p>
+        </div>
+
+        <div id="framework-desc">
+            <h3>Framework Mapping</h3>
+            <div class="desc-block">
+                <span class="desc-title">Active Filaments (n):</span> Governs the total number of interacting wave paths. Maps to the Super-Linear Node Exponent ($n^{1.014}$).
+            </div>
+            <div class="desc-block">
+                <span class="desc-title">Plenum Fluid Density:</span> Dictates medium viscosity profile, controlling the damping factor during stochastic mixing phases.
+            </div>
+            <div class="desc-block">
+                <span class="desc-title">Markov Spectral Collapse:</span> Models the Soliton Resolution Conjecture. Simulates the instantaneous probabilistic transition of chaotic fields into stable, discrete eigenvalues.
+            </div>
+            <div class="desc-block">
+                <span class="desc-title">Erdős Phase Matrix Shift (&theta;):</span> Sweeps continuous coordinate field alignment in radians. $0.00\pi$ and $2.00\pi$ designate in-phase convergence. $1.00\pi$ triggers the exact anti-phase vector inversion.
+            </div>
+        </div>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="universeCanvas"></canvas>
+        <div id="hud">
+            <div id="hud-title" class="hud-title">Galactic Resonance Matrix</div>
+            <div id="hud-text" class="hud-text">Observing flat velocity curves generated entirely by the geometric eigenvalue of the nonlinear plenum fluid. Filament intersections align with the super-linear Erdős network scaling bound (n^1.014).</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('universeCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const btnMacro = document.getElementById('btn-macro');
+    const btnMicro = document.getElementById('btn-micro');
+    const btnBio = document.getElementById('btn-bio');
+    const btnBlackHole = document.getElementById('btn-blackhole');
+    
+    const sliderPhase = document.getElementById('slider-phase');
+    const sliderFilaments = document.getElementById('slider-filaments');
+    const sliderDensity = document.getElementById('slider-density');
+    const sliderFreq = document.getElementById('slider-freq');
+    const btnPulse = document.getElementById('btn-pulse');
+    const rtiFill = document.getElementById('rti-fill');
+    
+    const hudTitle = document.getElementById('hud-title');
+    const hudText = document.getElementById('hud-text');
+    const mobHudTitle = document.getElementById('mob-hud-title');
+    const mobHudText = document.getElementById('mob-hud-text');
+
+    const valPhase = document.getElementById('val-phase');
+    const valFilaments = document.getElementById('val-filaments');
+    const valDensity = document.getElementById('val-density');
+    const valFreq = document.getElementById('val-freq');
+
+    // Central text registry to protect variables from scope anomalies
+    const modeConfig = {
+        macro: {
+            title: "Galactic Resonance Matrix",
+            text: "Observing flat velocity curves generated entirely by the geometric eigenvalue of the nonlinear plenum fluid. Filament intersections align with the super-linear Erdős network scaling bound (n^1.014)."
+        },
+        micro: {
+            title: "Acoustic Bound State (White Atom)",
+            text: "Hydrogen orbital rendering derived from emergent quantization in a dispersive medium. Matter manifests as a localized, spherical 3D cymatic standing wave tracking Golod-Shafarevich towers."
+        },
+        bio: {
+            title: "Biological Transducer (The Observer)",
+            text: "Visualizing coherent phase-locking events that drop local fluid viscosity via rapid mixing. The Markov coupling engine forces random intent to organize into structural fields."
+        },
+        blackhole: {
+            title: "Non-Singular Vortex Core",
+            text: "Left: Standard Physics (GR) creates an unphysical infinite singularity tear. Right: Soliton Framework resolves the point into a self-limiting, radiating Superfluid Vortex Core."
+        }
+    };
+
+    const state = {
+        mode: 'macro',
+        time: 0,
+        pulseActive: 0,
+        phaseShift: 0.0, 
+        filamentsNum: 50, 
+        fluidDensity: 1.2,
+        freqIndex: 1,
+        jitter: 0,
+        phaseDirection: 1,  
+        velocityScale: 1.0, 
+        chaosField: [],
+        isInPhase: false,
+        isAntiPhase: false
+    };
+
+    let lastTime = 0; 
+
+    function initChaos() {
+        state.chaosField = [];
+        for (let i = 0; i < 40; i++) {
+            state.chaosField.push({
+                x: Math.random() * 2 - 1,
+                y: Math.random() * 2 - 1,
+                speed: Math.random() * 0.05 + 0.02,
+                phase: Math.random() * Math.PI * 2
+            });
+        }
+    }
+
+    function resize() {
+        if (canvas && canvas.parentElement) {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+    }
+    window.addEventListener('resize', resize);
+
+    function setMode(m, activeBtn) {
+        state.mode = m;
+        const buttons = [btnMacro, btnMicro, btnBio, btnBlackHole];
+        for (let i = 0; i < buttons.length; i++) {
+            if (buttons[i]) {
+                buttons[i].classList.remove('active');
+            }
+        }
+        if (activeBtn) activeBtn.classList.add('active');
+        updateStateValues();
+    }
+
+    if (btnMacro) {
+        btnMacro.addEventListener('click', function() { setMode('macro', btnMacro); });
+    }
+    if (btnMicro) {
+        btnMicro.addEventListener('click', function() { setMode('micro', btnMicro); });
+    }
+    if (btnBio) {
+        btnBio.addEventListener('click', function() { setMode('bio', btnBio); });
+    }
+    if (btnBlackHole) {
+        btnBlackHole.addEventListener('click', function() { setMode('blackhole', btnBlackHole); });
+    }
+
+    function updateStateValues() {
+        state.phaseShift = sliderPhase ? parseFloat(sliderPhase.value) : 0.0;
+        state.filamentsNum = sliderFilaments ? parseInt(sliderFilaments.value) : 50;
+        state.fluidDensity = sliderDensity ? parseFloat(sliderDensity.value) : 1.2;
+        state.freqIndex = sliderFreq ? parseInt(sliderFreq.value) : 1;
+
+        if (valPhase) valPhase.innerText = state.phaseShift.toFixed(2) + "\u03C0";
+        if (valFilaments) valFilaments.innerText = state.filamentsNum;
+        if (valDensity) valDensity.innerText = state.fluidDensity.toFixed(2);
+        if (valFreq) valFreq.innerText = state.freqIndex;
+
+        // Dynamic text syncing pulling from the isolated object configuration
+        const activeConfig = modeConfig[state.mode];
+        if (activeConfig) {
+            if (hudTitle) hudTitle.innerText = activeConfig.title;
+            if (hudText) hudText.innerText = activeConfig.text;
+            if (mobHudTitle) mobHudTitle.innerText = activeConfig.title;
+            if (mobHudText) mobHudText.innerText = activeConfig.text;
+        }
+
+        let distTo0 = Math.abs(state.phaseShift - 0.0);
+        let distTo1 = Math.abs(state.phaseShift - 1.0);
+        let distTo2 = Math.abs(state.phaseShift - 2.0);
+        
+        let minGeometricDist = Math.min(distTo0, distTo1, distTo2);
+        if (minGeometricDist > 0.15) {
+            state.jitter = minGeometricDist * 5.0;
+        } else {
+            state.jitter = 0;
+        }
+
+        state.isInPhase = (distTo0 < 0.12 || distTo2 < 0.12);
+        state.isAntiPhase = (distTo1 < 0.12);
+
+        if (state.isInPhase) {
+            state.phaseDirection = 1;     
+            state.velocityScale = 1.4;     
+        } else if (state.isAntiPhase) {
+            state.phaseDirection = -1;    
+            state.velocityScale = 1.4;
+        } else {
+            if (state.phaseShift < 1.0) {
+                state.phaseDirection = 1;
+            } else {
+                state.phaseDirection = -1;
+            }
+            state.velocityScale = 0.8;     
+        }
+
+        let erdValue = Math.pow(state.filamentsNum, 1.014);
+        let baselineValue = state.filamentsNum;
+        let scaleBonus = (erdValue - baselineValue) * 4.0;
+
+        let baseStability = 0;
+        if (state.mode === 'macro') {
+            baseStability = 75 + scaleBonus - Math.abs(state.fluidDensity - 1.2) * 20;
+        } else if (state.mode === 'micro') {
+            baseStability = 60 + (state.fluidDensity * 15) + (state.freqIndex * 8);
+        } else if (state.mode === 'bio') {
+            baseStability = 80 + scaleBonus - Math.abs(state.fluidDensity - 1.2) * 25;
+        } else {
+            baseStability = 50 + (state.fluidDensity * 15);
+        }
+
+        let rawCoherence = baseStability * (1 - (minGeometricDist / 2.0));
+        let k = 0.1; 
+        let x0 = 50; 
+        let smoothCoherence = 5 + (95 / (1 + Math.exp(-k * (rawCoherence - x0))));
+
+        if (state.pulseActive > 0) {
+            smoothCoherence = smoothCoherence + (100 - smoothCoherence) * state.pulseActive;
+        }
+        
+        if (rtiFill) {
+            rtiFill.style.width = smoothCoherence.toFixed(0) + "%";
+        }
+    }
+
+    const sliders = [sliderPhase, sliderFilaments, sliderDensity, sliderFreq];
+    for (let i = 0; i < sliders.length; i++) {
+        if (sliders[i]) {
+            sliders[i].addEventListener('input', updateStateValues);
+        }
+    }
+
+    if (btnPulse) {
+        btnPulse.addEventListener('click', function() {
+            state.pulseActive = 1.0; 
+        });
+    }
+
+    function animate(timestamp) {
+        if (!lastTime) lastTime = timestamp;
+        const dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const maxRadius = Math.min(canvas.width, canvas.height) * 0.45;
+        
+        if (state.pulseActive > 0) {
+            state.pulseActive -= 0.84 * dt; 
+            if(state.pulseActive < 0) state.pulseActive = 0;
+            updateStateValues();
+        }
+
+        state.time += 1.5 * dt * (1 - state.pulseActive * 0.4) * state.velocityScale; 
+
+        let currentCenterX = centerX + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
+        let currentCenterY = centerY + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
+
+        if (state.pulseActive > 0.05 && state.mode !== 'blackhole') {
+            drawChaosPlenum(centerX, centerY, maxRadius);
+        }
+
+        if (state.mode === 'macro') {
+            drawMacroSoliton(currentCenterX, currentCenterY, maxRadius, state.filamentsNum, state.fluidDensity);
+        } else if (state.mode === 'micro') {
+            drawMicroAtom(centerX, centerY, maxRadius, state.freqIndex, state.fluidDensity);
+        } else if (state.mode === 'bio') {
+            drawBioObserver(currentCenterX, currentCenterY, maxRadius, state.fluidDensity, state.freqIndex);
+        }
