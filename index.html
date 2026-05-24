@@ -328,14 +328,14 @@
     }
     window.addEventListener('resize', resize);
 
-    btnMacro.addEventListener('click', () => { setMode('macro', btnMacro, "Galactic Resonance Matrix", "Observing flat velocity curves generated entirely by the geometric eigenvalue of the nonlinear plenum fluid. Filament intersections align with the super-linear Erdős network scaling bound (n^1.014)."); });
-    btnMicro.addEventListener('click', () => { setMode('micro', btnMicro, "Acoustic Bound State (White Atom)", "Hydrogen orbital rendering derived from emergent quantization in a dispersive medium. Matter manifests as a localized, spherical 3D cymatic standing wave tracking Golod-Shafarevich towers."); });
-    btnBio.addEventListener('click', () => { setMode('bio', btnBio, "Biological Transducer (The Observer)", "Visualizing coherent phase-locking events that drop local fluid viscosity via rapid mixing. The Markov coupling engine forces random intent to organize into structural fields."); });
-    btnBlackHole.addEventListener('click', () => { setMode('blackhole', btnBlackHole, "Non-Singular Vortex Core", "Left: Standard Physics (GR) creates an unphysical infinite singularity tear. Right: Soliton Framework resolves the point into a self-limiting, radiating Superfluid Vortex Core."); });
-
     function setMode(m, activeBtn, title, text) {
         state.mode = m;
-        [btnMacro, btnMicro, btnBio, btnBlackHole].forEach(b => { if(b) b.classList.remove('active'); });
+        const buttons = [btnMacro, btnMicro, btnBio, btnBlackHole];
+        for (let i = 0; i < buttons.length; i++) {
+            if (buttons[i]) {
+                buttons[i].classList.remove('active');
+            }
+        }
         if (activeBtn) activeBtn.classList.add('active');
         
         if (hudTitle) hudTitle.innerText = title;
@@ -346,13 +346,34 @@
         updateStateValues();
     }
 
+    if (btnMacro) {
+        btnMacro.addEventListener('click', function() { 
+            setMode('macro', btnMacro, "Galactic Resonance Matrix", "Observing flat velocity curves generated entirely by the geometric eigenvalue of the nonlinear plenum fluid. Filament intersections align with the super-linear Erdős network scaling bound (n^1.014)."); 
+        });
+    }
+    if (btnMicro) {
+        btnMicro.addEventListener('click', function() { 
+            setMode('micro', btnMicro, "Acoustic Bound State (White Atom)", "Hydrogen orbital rendering derived from emergent quantization in a dispersive medium. Matter manifests as a localized, spherical 3D cymatic standing wave tracking Golod-Shafarevich towers."); 
+        });
+    }
+    if (btnBio) {
+        btnBio.addEventListener('click', function() { 
+            setMode('bio', btnBio, "Biological Transducer (The Observer)", "Visualizing coherent phase-locking events that drop local fluid viscosity via rapid mixing. The Markov coupling engine forces random intent to organize into structural fields."); 
+        });
+    }
+    if (btnBlackHole) {
+        btnBlackHole.addEventListener('click', function() { 
+            setMode('blackhole', btnBlackHole, "Non-Singular Vortex Core", "Left: Standard Physics (GR) creates an unphysical infinite singularity tear. Right: Soliton Framework resolves the point into a self-limiting, radiating Superfluid Vortex Core."); 
+        });
+    }
+
     function updateStateValues() {
         state.phaseShift = sliderPhase ? parseFloat(sliderPhase.value) : 0.0;
         state.filamentsNum = sliderFilaments ? parseInt(sliderFilaments.value) : 50;
         state.fluidDensity = sliderDensity ? parseFloat(sliderDensity.value) : 1.2;
         state.freqIndex = sliderFreq ? parseInt(sliderFreq.value) : 1;
 
-        if (valPhase) valPhase.innerText = `${state.phaseShift.toFixed(2)}\u03C0`;
+        if (valPhase) valPhase.innerText = state.phaseShift.toFixed(2) + "\u03C0";
         if (valFilaments) valFilaments.innerText = state.filamentsNum;
         if (valDensity) valDensity.innerText = state.fluidDensity.toFixed(2);
         if (valFreq) valFreq.innerText = state.freqIndex;
@@ -362,7 +383,11 @@
         let distTo2 = Math.abs(state.phaseShift - 2.0);
         
         let minGeometricDist = Math.min(distTo0, distTo1, distTo2);
-        state.jitter = minGeometricDist > 0.15 ? (minGeometricDist * 5.0) : 0;
+        if (minGeometricDist > 0.15) {
+            state.jitter = minGeometricDist * 5.0;
+        } else {
+            state.jitter = 0;
+        }
 
         state.isInPhase = (distTo0 < 0.12 || distTo2 < 0.12);
         state.isAntiPhase = (distTo1 < 0.12);
@@ -374,7 +399,11 @@
             state.phaseDirection = -1;    
             state.velocityScale = 1.4;
         } else {
-            state.phaseDirection = (state.phaseShift < 1.0) ? 1 : -1; 
+            if (state.phaseShift < 1.0) {
+                state.phaseDirection = 1;
+            } else {
+                state.phaseDirection = -1;
+            }
             state.velocityScale = 0.8;     
         }
 
@@ -403,16 +432,19 @@
         }
         
         if (rtiFill) {
-            rtiFill.style.width = `${smoothCoherence.toFixed(0)}%`;
+            rtiFill.style.width = smoothCoherence.toFixed(0) + "%";
         }
     }
 
-    [sliderPhase, sliderFilaments, sliderDensity, sliderFreq].forEach(slider => {
-        if (slider) slider.addEventListener('input', updateStateValues);
-    });
+    const sliders = [sliderPhase, sliderFilaments, sliderDensity, sliderFreq];
+    for (let i = 0; i < sliders.length; i++) {
+        if (sliders[i]) {
+            sliders[i].addEventListener('input', updateStateValues);
+        }
+    }
 
     if (btnPulse) {
-        btnPulse.addEventListener('click', () => {
+        btnPulse.addEventListener('click', function() {
             state.pulseActive = 1.0; 
         });
     }
@@ -461,8 +493,9 @@
     }
 
     function drawChaosPlenum(cx, cy, maxR) {
-        ctx.fillStyle = `rgba(69, 243, 255, ${state.pulseActive * 0.15})`;
-        state.chaosField.forEach(p => {
+        ctx.fillStyle = "rgba(69, 243, 255, " + (state.pulseActive * 0.15) + ")";
+        for (let i = 0; i < state.chaosField.length; i++) {
+            let p = state.chaosField[i];
             p.phase += p.speed;
             let offsetR = maxR * 0.8 * Math.sin(p.phase);
             let px = cx + p.x * offsetR;
@@ -470,9 +503,88 @@
             ctx.beginPath();
             ctx.arc(px, py, 1.5 + state.pulseActive * 2, 0, Math.PI * 2);
             ctx.fill();
-        });
+        }
     }
 
     function drawMacroSoliton(cx, cy, maxR, filaments, dens) {
         ctx.strokeStyle = 'rgba(255, 140, 0, 0.12)'; ctx.lineWidth = 1.0;
-        for (let r = 50; r < maxR * 1.5; r
+        for (let r = 50; r < maxR * 1.5; r += 40) { 
+            ctx.beginPath(); 
+            ctx.arc(cx, cy, r + Math.sin(state.time * state.phaseDirection + r*0.02)*5, 0, Math.PI * 2); 
+            ctx.stroke(); 
+        }
+        
+        let numArms = 3; 
+        ctx.lineWidth = 1.5;
+        for (let a = 0; a < numArms; a++) {
+            let armAngle = (a * Math.PI * 2) / numArms + (state.time * 0.08 * state.phaseDirection); 
+            ctx.beginPath();
+            
+            let stepSize = Math.max(2, Math.floor(150 / filaments));
+            for (let r = maxR; r > 5; r -= stepSize) {
+                let waveMod = state.jitter * 0.005 * Math.sin(r * 0.1 - state.time * 4 * state.phaseDirection);
+                let theta = armAngle + (maxR - r) * (0.0004 * filaments * dens) + waveMod;
+                let x = cx + Math.cos(theta) * r; 
+                let y = cy + Math.sin(theta) * r;
+                let alpha = Math.max(0, Math.min(1, (1 - r / maxR) * 0.6)); 
+                
+                if (state.isInPhase || state.isAntiPhase) {
+                    ctx.strokeStyle = "rgba(69, 243, 255, " + (alpha * 1.6) + ")";
+                } else {
+                    ctx.strokeStyle = "rgba(69, 243, 255, " + alpha + ")";
+                }
+                
+                if (r === maxR) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+
+                if (r % 20 === 0 && alpha > 0.15) {
+                    if (state.isAntiPhase) {
+                        ctx.fillStyle = "rgba(245, 66, 164, " + (alpha * 1.5) + ")";
+                    } else {
+                        ctx.fillStyle = "rgba(69, 243, 255, " + (alpha * 1.5) + ")";
+                    }
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2.5 + (state.pulseActive * 3), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            ctx.stroke();
+        }
+
+        let gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 0.4);
+        let gradAlpha = Math.max(0, Math.min(1, 0.7 * (filaments/50)));
+        if (state.isInPhase) gradAlpha = 1.0; 
+        
+        gradient.addColorStop(0, "rgba(69, 243, 255, " + (gradAlpha || 0.7) + ")"); 
+        gradient.addColorStop(0.3, "rgba(102, 252, 241, 0.35)"); 
+        gradient.addColorStop(1, 'rgba(11, 12, 16, 0)');
+        ctx.fillStyle = gradient; ctx.beginPath(); ctx.arc(cx, cy, maxR * 0.4, 0, Math.PI * 2); ctx.fill();
+
+        let axisY = cy + maxR * 0.75; 
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx - maxR, axisY); ctx.lineTo(cx + maxR, axisY); ctx.stroke();
+        ctx.strokeStyle = '#66fcf1'; ctx.lineWidth = 2; ctx.beginPath();
+        for (let px = -maxR; px <= maxR; px += 5) {
+            let r = Math.abs(px); if (r < 10) continue;
+            
+            let normalizedR = r / maxR;
+            let v = (1 - Math.exp(-normalizedR * 8.0)) * (maxR * 0.22) * (1 + (filaments - 50) * 0.002); 
+            
+            let py = axisY - v;
+            if (px === -maxR) {
+                ctx.moveTo(cx + px, py);
+            } else {
+                ctx.lineTo(cx + px, py);
+            }
+        }
+        ctx.stroke(); 
+        ctx.fillStyle = 'rgba(102, 252, 241, 0.7)'; ctx.font = '10px Segoe UI'; 
+        ctx.fillText("PHASE ENVELOPE VELOCITY: RATIO MODULATION EQUIVALENT TO n^1.014 NODAL LATTICE", cx - maxR, axisY + 14);
+    }
+
+    function drawMicroAtom(cx, cy, maxR, n, dens) {
+        let totalRays = 180; ctx.lineWidth = 2;
+        
+        for
