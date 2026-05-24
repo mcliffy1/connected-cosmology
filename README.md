@@ -1,68 +1,63 @@
-# connected-cosmology
-Cosmology theory without Dark matter 
-# 🌌 The Soliton Resonance Framework Simulation
+# SVT & NLS Dynamics Simulator (v5.5)
 
-Welcome to the interactive cockpit of the Soliton Resonance Framework. This simulation models a scale-invariant universe where space-time is treated not as an empty vacuum, but as a dynamic, non-linear superfluid plenum. 
+A high-fidelity, real-time interactive canvas visualizer designed to model cosmological and quantum configurations through the lens of **Superfluid Vacuum Theory (SVT)** and the **Nonlinear Schrödinger / Gross-Pitaevskii Equation (GPE)**.
 
-By adjusting the faders on the sidebar, you are manipulating the real-world acoustic, geometric, and phase-coherence parameters that govern stable wave manifestations across atomic, biological, and cosmological scales.
+This simulator bridges the gap between abstract fluid mechanics and structural physical emergence, demonstrating how localized matter envelopes ("solitons") condense stably out of a non-linear superfluid medium.
 
 ---
 
-## 🔬 Scientific Foundations & Empirical Validation Ledger
+## 🚀 Key Accomplishments & Refinements
 
-This framework is not built on abstract metaphors; it is anchored directly to breakthrough peer-reviewed research, advanced laboratory data, and foundational hydrodynamic wave mechanics. Below is the authoritative ledger of the primary sources validating the physics of the simulation engines.
-
-### 1. Emergent Quantization & Dispersive Vacuum Dynamics
-* **Primary Scientist:** Dr. Harold "Sonny" White *(Advanced Propulsion Physics Laboratory / Limitless Space Institute)*
-* **Core Paper:** *Emergent Quantization from a Dynamic Vacuum* (Physical Review Research, March 2026)
-* **Framework Mapping:** **Atomic Scale Mode**
-> **Critical Insight:** Dr. White’s team proved that atomic quantization and the entire hydrogenic spectrum ($E_n \propto -1/n^2$) emerge naturally from classical-like acoustic standing wave resonances within a dispersive fluid vacuum ($\omega = Dq^2$). This eliminates the need for arbitrary wave axioms and validates our treating of matter as a localized 3D cymatic soliton vortex.
-
-### 2. Non-Local Phase Alignment & Inverted Time-Envelopes
-* **Primary Scientists:** D. Angulo, K. Thompson, V. Nixon, A. Jiao, H. M. Wiseman, & A. M. Steinberg *(University of Toronto)*
-* **Core Paper:** *Experimental Observation of Negative Weak Values for the Time Atoms Spend in the Excited State as a Photon Is Transmitted* (Physical Review Letters 136, 153601, April 2026)
-* **Framework Mapping:** **Tesla Harmonic Node & Synchronicity Pulse**
-> **Critical Insight:** This landmark quantum optics experiment used weak measurement techniques to prove that a transmitted photon can spend a *negative* time ($−0.82 \pm 0.31 \, \tau_0$) as an atomic excitation. This provides direct empirical proof for our variable phase engine, confirming that negative phase values describe real, physical, non-local states when a system achieves phase-locking.
-> 
-### 3. Cosmic Scale-Invariance & The Mass-Radius Phase Boundary
-* **Primary Scientists:** Dr. Charles H. Lineweaver & Vihan M. Patel *(Research School of Astronomy and Astrophysics, Australian National University)*
-* **Core Paper:** *All objects and some questions* (American Journal of Physics 91, 819-825, October 2023)
-* **Framework Mapping:** **The Complete Multi-Scale Matrix (v5.0 Engine Framework)**
-> **Critical Insight:** Lineweaver and Patel mapped the masses and sizes of every known structure in the universe on a single pedagogical plot. Their work highlights the geometric intersection where the General Relativity boundary ($m \propto r$) meets the Quantum Uncertainty boundary ($m \propto r^{-1}$). This intersection culminates at the minimum possible size limit: the Planck-mass black hole, or **"instanton."** Our model treats the instanton not as a point singularity, but as the fundamental, cross-scale fluid breather node (the master grounding coordinate of **Node 9**). Furthermore, their empirical plotting shows that the entire observable universe sits precisely on the black hole boundary line—validating our architecture's claim that cosmological expansion is a localized phase-gradient shift inside a massive, scale-invariant superfluid vortex.
->
-> 
-### 4. Nonlinear Wave Mechanics & Soliton Self-Stabilization
-* **Primary Scientist:** Dr. Frank Merle *(Chair of Mathematical Analysis, Université de Cergy-Pontoise / IHES)*
-* **Core Papers:** Mathematical proofs on blow-up profiles and stable wave classifications for the Nonlinear Schrödinger Equation (NLS).
-* **Framework Mapping:** **Field Nonlinearity (The Merle Slider) & Black Hole Lab**
-> **Critical Insight:** Dr. Merle’s mathematical proofs define the exact non-linear threshold where a wave packet transitions from chaotic scattering into a self-confined, spatially stable bound state. In our macro-galactic model, this replaces the need for hypothetical particle "dark matter halos"—the flat rotation curves track the constant phase velocity of the soliton envelope.
-
-### 5. Hydrodynamic Wave Formulation (The "Cosmic River" Blueprint)
-* **Primary Scientist:** Erwin Madelung *(Mathematical Physicist)*
-* **Historical Foundation:** *Quantentheorie in hydrodynamischer Form* (Z. Phys., 1927)
-* **Framework Mapping:** **The Superfluid Spacetime Plenum Fluid**
-> **Critical Insight:** Madelung mathematically proved that the complex wave function can be rewritten completely as a compressible, physical fluid with local density ($\rho$) and a real velocity field ($v = \nabla S/\mu$). This acts as the baseline math for our model, treating the space-time vacuum as a flowing fluid substrate shaped by internal pressure gradients.
-
-### 6. Toroidal Resonance & Coupled Biological Oscillations
-* **Primary Scientist:** Itzhak Bentov *(Biomedical Engineer / Inventor)*
-* **Historical Foundation:** *Stalking the Wild Pendulum: On the Mechanics of Consciousness* (1977) / Operationalized in the declassified 1983 CIA *Gateway Process Evaluation* Ledger.
-* **Framework Mapping:** **Bio-Observer Scale Mode**
-> **Critical Insight:** Bentov mapped the human cardiovascular circuit as a coupled acoustic oscillator creating a 7Hz standing wave down the aorta. This provides the blueprint for the Bio-Observer mode, illustrating how biological systems function as phase-aligned, toroidal transducers that match internal frequency signatures with macro-environmental matrices like the Earth's ionospheric Schumann Resonance.
+* **Defensive DOM Architecture:** Eliminated critical top-down asynchronous race conditions by encapsulating layout engine mapping and UI binding securely inside the `window.onload` lifecycle hook.
+* **Gross-Pitaevskii Mathematical Mapping:** Transitioned the core rendering engine from abstract visual aesthetics to a rigorous scientific framework, explicitly mapping interactive variables directly to the field nonlinearity term $\frac{\lambda}{2}|\psi|^4$.
+* **Lineweaver Stability Corridor Coupling:** Implemented a targeted structural preset button that dynamically calculates and restricts the fluid mass ($M_{\text{eff}}$) and self-interaction ($\lambda$) coefficients to the precise "stable condensation windows" highlighted in cosmic phase space literature.
+* **Dynamic Phase Space Visualization:** Engineered an interactive, shifting "Forbidden Bounds" matrix overlay. Rather than functioning as a static watermark, the geometric intersections automatically adapt to slider inputs, visually mapping out the changing margins between the **Schwarzschild Boundary** (General Relativity) and the **Compton Wavelength Boundary** (Quantum Mechanics).
 
 ---
 
-## 🎛️ Scale Mapping & Core Architecture Reference
+## 🌌 Scale Domains Mode Matrix
 
-| Simulation Scale | Validating Scientist | Physical Mechanism | Simulation Parameter |
-| :--- | :--- | :--- | :--- |
-| **Galactic (Macro)** | Frank Merle (NLS Proofs) | Non-linear wave self-confinement | **Field Nonlinearity:** Balances cosmic dispersion to fix flat velocity profiles. |
-| **Atomic (Micro)** | Dr. Harold White (2026) | Quadratic temporal dispersion | **Resonant Frequency ($\omega$):** Generates discrete cymatic shell geometries. |
-| **Bio-Observer** | Itzhak Bentov (1977) | Coupled cardiovascular standing waves | **Fluid Density:** Tracks background index of refraction and matrix drift. |
-| **Synchronicity Engine** | Aephraim Steinberg (2026) | Weak measurement & post-selection | **Tesla Harmonic Node (3-6-9):** Controls positive, negative phase inversion, and grounding. |
+The simulation engine features four core scaling thresholds, each mapping specific fluid parameter profiles to emergent macro and micro structures:
+
+| Domain Mode | Theoretical Paradigm | Applied Visual Mechanics |
+| --- | --- | --- |
+| **Galactic Soliton** | Bose-Einstein Condensate (BEC) Dark Matter | Models flat velocity curves and stationary breather spiral arms, completely bypassing the classical galactic wind-up paradox. |
+| **White's Atom** | Acoustic Bound States & Evanescent Stop-Bands | Simulates hydrogen orbital constraints via temporal dispersion ($\omega = Dq^2$). Boundary exclusion acts as a hydrodynamic analog to the Pauli Exclusion Principle. |
+| **Couder Pilot-Wave** | Non-Local Cavity Entanglement | Hydrodynamic analog to quantum non-locality based on Yves Couder's walking droplet experiments. Shifts to a single node instantaneously modulate shared boundary conditions. |
+| **Vortex Core** | Non-Singular Superfluid Vacuum | Splits the workspace canvas to contrast general relativity's unphysical infinite singularity breakdown against the self-limiting, localized vortex core of the NLS framework. |
 
 ---
 
-## 🚀 Presentation & Quick-Start Mix Notes
+## 🛠️ Variable Parameter Mapping
 
-1. **Test the Phase Engine (Tesla Slider):** Set the slider to **3** to observe fast, clockwise matter compression. Slide to **6** to witness an instantaneous $180^\circ$ phase inversion to counter-clockwise antimatter vorticity. Park the slider on **9** to lock into the zero-velocity core—the absolute, hyper-stable grounding stillness of the system.
-2. **Inject a Coherence Spike:** Hit the **Inject Synchronicity Pulse** button at any time to model an instantaneous localized phase-locking event, dropping local fluid impedance and spiking coherence to 100%.
+```
+     [Slider Controls]                      [Gross-Pitaevskii Field Engine]
+Non-Linear Self-Interaction (λ) --------> Regulates Merle field expansion vs. collapse
+Effective Fluid Mass (M_eff)    --------> Dictates Madelung bulk fluid velocity profile
+Temporal Dispersion (D)         --------> Enforces spatial boundaries & reactive stop-bands
+Global Phase State (θ)          --------> Drives wave direction, velocity scales, & vectors
+
+```
+
+* **Non-Linear Interaction ($\lambda$):** Directly corresponds to Frank Merle's non-linear field self-interaction index. It acts as an adjustable counter-pressure, halting blow-ups and ensuring localized envelope permanence.
+* **Effective Mass ($M_{\text{eff}}$):** Governs the velocity fields of the background plenum fluid medium, scaling the stochastic damping and phase-mixing intensities.
+* **Temporal Dispersion ($D$):** Maps to Dr. Harold White's spatial boundary conditions, forcing natural quantization into discrete orbital envelopes without requiring probability assumptions.
+* **Global Phase State ($\theta$):** Sweeps configuration space alignments. Setting this parameter to $1.00\pi$ triggers an absolute anti-phase vector inversion, simulating superluminal topological vortex transitions.
+
+---
+
+## 📐 The Physics of the Forbidden Bounds
+
+When toggled, the simulator draws the boundaries of physical existence derived from log-log mass-radius limits:
+
+---
+
+## code Structure & Implementation
+
+The application is deployed entirely within a zero-dependency, unified single-file architecture (`index.html`) using raw HTML5 Canvas and native strict-block ES6+ JavaScript.
+
+### File Geometry
+
+* **CSS Layout:** Implements a strict flexbox-split UI sidebar dashboard housing alongside a fully responsive canvas container, fitted with CSS media breakpoints to suppress graphic rendering on small viewports safely.
+* **State Registry:** Houses an isolated, mutable configuration state cache (`state`) sampled 60 times per second by the animation frame execution cycle.
+* **Error-Insulated Lifecycle:** Element nodes are securely cached via element presence checks before handler hooks are allocated, rendering the application highly resilient against front-end rendering drops.
