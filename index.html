@@ -368,4 +368,111 @@
         state.isAntiPhase = (distTo1 < 0.12);
 
         if (state.isInPhase) {
-            state.phaseDirection =
+            state.phaseDirection = 1;     
+            state.velocityScale = 1.4;     
+        } else if (state.isAntiPhase) {
+            state.phaseDirection = -1;    
+            state.velocityScale = 1.4;
+        } else {
+            state.phaseDirection = (state.phaseShift < 1.0) ? 1 : -1; 
+            state.velocityScale = 0.8;     
+        }
+
+        let erdValue = Math.pow(state.filamentsNum, 1.014);
+        let baselineValue = state.filamentsNum;
+        let scaleBonus = (erdValue - baselineValue) * 4.0;
+
+        let baseStability = 0;
+        if (state.mode === 'macro') {
+            baseStability = 75 + scaleBonus - Math.abs(state.fluidDensity - 1.2) * 20;
+        } else if (state.mode === 'micro') {
+            baseStability = 60 + (state.fluidDensity * 15) + (state.freqIndex * 8);
+        } else if (state.mode === 'bio') {
+            baseStability = 80 + scaleBonus - Math.abs(state.fluidDensity - 1.2) * 25;
+        } else {
+            baseStability = 50 + (state.fluidDensity * 15);
+        }
+
+        let rawCoherence = baseStability * (1 - (minGeometricDist / 2.0));
+        let k = 0.1; 
+        let x0 = 50; 
+        let smoothCoherence = 5 + (95 / (1 + Math.exp(-k * (rawCoherence - x0))));
+
+        if (state.pulseActive > 0) {
+            smoothCoherence = smoothCoherence + (100 - smoothCoherence) * state.pulseActive;
+        }
+        
+        if (rtiFill) {
+            rtiFill.style.width = `${smoothCoherence.toFixed(0)}%`;
+        }
+    }
+
+    [sliderPhase, sliderFilaments, sliderDensity, sliderFreq].forEach(slider => {
+        if (slider) slider.addEventListener('input', updateStateValues);
+    });
+
+    if (btnPulse) {
+        btnPulse.addEventListener('click', () => {
+            state.pulseActive = 1.0; 
+        });
+    }
+
+    function animate(timestamp) {
+        if (!lastTime) lastTime = timestamp;
+        const dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const maxRadius = Math.min(canvas.width, canvas.height) * 0.45;
+        
+        if (state.pulseActive > 0) {
+            state.pulseActive -= 0.84 * dt; 
+            if(state.pulseActive < 0) state.pulseActive = 0;
+            updateStateValues();
+        }
+
+        state.time += 1.5 * dt * (1 - state.pulseActive * 0.4) * state.velocityScale; 
+
+        let currentCenterX = centerX + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
+        let currentCenterY = centerY + (Math.random() - 0.5) * state.jitter * (1 - state.pulseActive);
+
+        if (state.pulseActive > 0.05 && state.mode !== 'blackhole') {
+            drawChaosPlenum(centerX, centerY, maxRadius);
+        }
+
+        if (state.mode === 'macro') {
+            drawMacroSoliton(currentCenterX, currentCenterY, maxRadius, state.filamentsNum, state.fluidDensity);
+        } else if (state.mode === 'micro') {
+            drawMicroAtom(centerX, centerY, maxRadius, state.freqIndex, state.fluidDensity);
+        } else if (state.mode === 'bio') {
+            drawBioObserver(currentCenterX, currentCenterY, maxRadius, state.fluidDensity, state.freqIndex);
+        } else {
+            drawBlackHoleLab(maxRadius);
+        }
+
+        if (state.pulseActive > 0 && state.mode !== 'blackhole') {
+            drawSynchronicityPulse(centerX, centerY, maxRadius);
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    function drawChaosPlenum(cx, cy, maxR) {
+        ctx.fillStyle = `rgba(69, 243, 255, ${state.pulseActive * 0.15})`;
+        state.chaosField.forEach(p => {
+            p.phase += p.speed;
+            let offsetR = maxR * 0.8 * Math.sin(p.phase);
+            let px = cx + p.x * offsetR;
+            let py = cy + p.y * offsetR;
+            ctx.beginPath();
+            ctx.arc(px, py, 1.5 + state.pulseActive * 2, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+
+    function drawMacroSoliton(cx, cy, maxR, filaments, dens) {
+        ctx.strokeStyle = 'rgba(255, 140, 0, 0.12)'; ctx.lineWidth = 1.0;
+        for (let r = 50; r < maxR * 1.5; r
