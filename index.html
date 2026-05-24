@@ -341,12 +341,31 @@
     }
 
     function drawForbiddenRegions(cx, cy, maxR) {
-        ctx.strokeStyle = 'rgba(255, 69, 69, 0.4)'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(cx - maxR, cy + maxR); ctx.lineTo(cx + maxR, cy - maxR); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(cx - maxR, cy - maxR); ctx.lineTo(cx + maxR, cy + maxR); ctx.stroke();
-        ctx.fillStyle = 'rgba(255, 69, 69, 0.8)'; ctx.font = '10px Courier New';
-        ctx.fillText("FORBIDDEN (QM BOUND)", cx - maxR, cy - maxR - 10); 
-        ctx.fillText("FORBIDDEN (GR BOUND)", cx - maxR, cy + maxR + 15);
+    if (!state.showForbidden) return;
+    
+    // Use the active effective mass as a scaling modifier for the phase space boundary
+    let massScale = state.effMass * 0.4;
+    
+    ctx.strokeStyle = 'rgba(255, 69, 69, 0.4)'; 
+    ctx.lineWidth = 2;
+    
+    // Dynamic Schwarzschild boundary - shifts with mass scale
+    ctx.beginPath(); 
+    ctx.moveTo(cx - maxR, cy + (maxR * massScale)); 
+    ctx.lineTo(cx + maxR, cy - (maxR * massScale)); 
+    ctx.stroke();
+    
+    // Dynamic Compton boundary - inversely shifts with mass scale
+    ctx.beginPath(); 
+    ctx.moveTo(cx - maxR, cy - (maxR / massScale)); 
+    ctx.lineTo(cx + maxR, cy + (maxR / massScale)); 
+    ctx.stroke();
+    
+    ctx.fillStyle = 'rgba(255, 69, 69, 0.8)'; 
+    ctx.font = '10px Courier New';
+    ctx.fillText("FORBIDDEN (QM BOUND)", cx - maxR, cy - (maxR / massScale) - 10); 
+    ctx.fillText("FORBIDDEN (GR BOUND)", cx - maxR, cy + (maxR * massScale) + 15);
+}
     }
 
     function drawMacroSoliton(cx, cy, maxR, lambda, mass) {
