@@ -294,7 +294,7 @@
         mode: 'macro',
         time: 0,
         pulseActive: 0,
-        phaseShift: 0.0, // Managed strictly as a coordinate-free radians variable
+        phaseShift: 0.0, 
         filamentsNum: 50, 
         fluidDensity: 1.2,
         freqIndex: 1,
@@ -357,7 +357,6 @@
         if (valDensity) valDensity.innerText = state.fluidDensity.toFixed(2);
         if (valFreq) valFreq.innerText = state.freqIndex;
 
-        // Coordinate-free Node Matching based on pure circular geometry
         let distTo0 = Math.abs(state.phaseShift - 0.0);
         let distTo1 = Math.abs(state.phaseShift - 1.0);
         let distTo2 = Math.abs(state.phaseShift - 2.0);
@@ -468,7 +467,6 @@
             let offsetR = maxR * 0.8 * Math.sin(p.phase);
             let px = cx + p.x * offsetR;
             let py = cy + p.y * offsetR;
-            ctx.shadowBlur = 0;
             ctx.beginPath();
             ctx.arc(px, py, 1.5 + state.pulseActive * 2, 0, Math.PI * 2);
             ctx.fill();
@@ -584,49 +582,4 @@
         for (let i = 0; i < totalLoops; i++) {
             let angle = (i * Math.PI * 2) / totalLoops + (state.time * 0.18 * state.phaseDirection); 
             ctx.beginPath();
-            for (let t = -Math.PI; t <= Math.PI; t += 0.1) {
-                let r = (maxR * 0.42) * (1 + 0.28 * Math.sin(freq * t + state.time * state.phaseDirection)); 
-                let noise = Math.sin(t * 10 + i) * noiseFactor;
-                let x = cx + Math.cos(angle) * (r + noise) * Math.cos(t); 
-                let y = cy + Math.sin(angle) * (r + noise) * Math.cos(t) + Math.sin(t) * (maxR * 0.22);
-                let alpha = Math.max(0, Math.min(1, (Math.cos(t) + 1) * 0.22 + 0.15)); 
-                if (state.isInPhase) alpha *= 1.5; 
-                
-                ctx.strokeStyle = `rgba(255, 185, 0, ${alpha})`;
-                if (t === -Math.PI) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-        }
-        let pulseGlow = Math.max(0, Math.min(50, 12 + state.pulseActive * 30)); 
-        ctx.fillStyle = '#ffffff'; ctx.shadowBlur = pulseGlow; ctx.shadowColor = '#66fcf1'; ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
-    }
-
-    function drawBlackHoleLab(maxR) {
-        const w = canvas.width; const h = canvas.height; const isPortrait = h > w;
-        const leftCenterX = isPortrait ? w / 2 : w * 0.33; const leftCenterY = isPortrait ? h * 0.25 : h / 2;
-        const rightCenterX = isPortrait ? w / 2 : w * 0.67; const rightCenterY = isPortrait ? h * 0.75 : h / 2;
-        const viewRadius = isPortrait ? maxR * 0.42 : maxR * 0.62;
-
-        ctx.strokeStyle = 'rgba(69, 243, 255, 0.18)'; ctx.lineWidth = 1; ctx.setLineDash([5, 5]); ctx.beginPath(); 
-        if (isPortrait) { ctx.moveTo(0, h * 0.5); ctx.lineTo(w, h * 0.5); } else { ctx.moveTo(w * 0.5, 0); ctx.lineTo(w * 0.5, h); }
-        ctx.stroke(); ctx.setLineDash([]);
-
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)'; ctx.font = 'bold 11px Segoe UI'; ctx.textAlign = 'center';
-        let textOffset = isPortrait ? viewRadius + 14 : viewRadius + 18;
-        ctx.fillText("STANDARD GENERAL RELATIVITY", leftCenterX, leftCenterY - textOffset);
-        ctx.fillText("SOLITON SUPERFLUID VORTEX CORE", rightCenterX, rightCenterY - textOffset);
-
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)'; ctx.lineWidth = 1.2; 
-        let classicalPulse = Math.sin(state.time * 0.5) * 2; 
-        
-        const epsilonSq = 100; 
-
-        for (let i = -8; i <= 8; i++) {
-            ctx.beginPath();
-            for (let r = viewRadius; r > 15; r -= 5) {
-                let warp = (Math.pow(28, 2) / (r * r + epsilonSq)) * (18 + classicalPulse); 
-                let angle = (i * Math.PI) / 8;
-                let x = leftCenterX + Math.cos(angle) * r; let y = leftCenterY + Math.sin(angle) * r + warp;
-                if (r === viewRadius) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
+            for (let t = -Math.PI; t <= Math
