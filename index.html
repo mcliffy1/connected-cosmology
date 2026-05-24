@@ -290,7 +290,6 @@
     const valDensity = document.getElementById('val-density');
     const valFreq = document.getElementById('val-freq');
 
-    // Central text registry to protect variables from scope anomalies
     const modeConfig = {
         macro: {
             title: "Galactic Resonance Matrix",
@@ -384,7 +383,6 @@
         if (valDensity) valDensity.innerText = state.fluidDensity.toFixed(2);
         if (valFreq) valFreq.innerText = state.freqIndex;
 
-        // Dynamic text syncing pulling from the isolated object configuration
         const activeConfig = modeConfig[state.mode];
         if (activeConfig) {
             if (hudTitle) hudTitle.innerText = activeConfig.title;
@@ -496,4 +494,70 @@
             drawMicroAtom(centerX, centerY, maxRadius, state.freqIndex, state.fluidDensity);
         } else if (state.mode === 'bio') {
             drawBioObserver(currentCenterX, currentCenterY, maxRadius, state.fluidDensity, state.freqIndex);
+        } else {
+            drawBlackHoleLab(maxRadius);
         }
+
+        if (state.pulseActive > 0 && state.mode !== 'blackhole') {
+            drawSynchronicityPulse(centerX, centerY, maxRadius);
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    function drawChaosPlenum(cx, cy, maxR) {
+        ctx.fillStyle = "rgba(69, 243, 255, " + (state.pulseActive * 0.15) + ")";
+        for (let i = 0; i < state.chaosField.length; i++) {
+            let p = state.chaosField[i];
+            p.phase += p.speed;
+            let offsetR = maxR * 0.8 * Math.sin(p.phase);
+            let px = cx + p.x * offsetR;
+            let py = cy + p.y * offsetR;
+            ctx.beginPath();
+            ctx.arc(px, py, 1.5 + state.pulseActive * 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function drawMacroSoliton(cx, cy, maxR, filaments, dens) {
+        ctx.strokeStyle = 'rgba(255, 140, 0, 0.12)'; ctx.lineWidth = 1.0;
+        for (let r = 50; r < maxR * 1.5; r += 40) { 
+            ctx.beginPath(); 
+            ctx.arc(cx, cy, r + Math.sin(state.time * state.phaseDirection + r*0.02)*5, 0, Math.PI * 2); 
+            ctx.stroke(); 
+        }
+        
+        let numArms = 3; 
+        ctx.lineWidth = 1.5;
+        for (let a = 0; a < numArms; a++) {
+            let armAngle = (a * Math.PI * 2) / numArms + (state.time * 0.08 * state.phaseDirection); 
+            ctx.beginPath();
+            
+            let stepSize = Math.max(2, Math.floor(150 / filaments));
+            for (let r = maxR; r > 5; r -= stepSize) {
+                let waveMod = state.jitter * 0.005 * Math.sin(r * 0.1 - state.time * 4 * state.phaseDirection);
+                let theta = armAngle + (maxR - r) * (0.0004 * filaments * dens) + waveMod;
+                let x = cx + Math.cos(theta) * r; 
+                let y = cy + Math.sin(theta) * r;
+                let alpha = Math.max(0, Math.min(1, (1 - r / maxR) * 0.6)); 
+                
+                if (state.isInPhase || state.isAntiPhase) {
+                    ctx.strokeStyle = "rgba(69, 243, 255, " + (alpha * 1.6) + ")";
+                } else {
+                    ctx.strokeStyle = "rgba(69, 243, 255, " + alpha + ")";
+                }
+                
+                if (r === maxR) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+
+                if (r % 20 === 0 && alpha > 0.15) {
+                    if (state.isAntiPhase) {
+                        ctx.fillStyle = "rgba(245, 66, 164, " + (alpha * 1.5) + ")";
+                    } else {
+                        ctx.fillStyle = "rgba(69, 243, 255, " + (alpha * 1.5) + ")";
+                    }
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2.5 + (state.pulseActive * 3), 0, Math.PI
